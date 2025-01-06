@@ -1,3 +1,4 @@
+// src/react/index.ts
 import React from 'react';
 import type { Store } from '../core/types';
 

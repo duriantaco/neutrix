@@ -1,3 +1,4 @@
+// src/core/utils.ts
 import { Path, State } from './types';
 
 export function get(obj: State, path: Path): any {

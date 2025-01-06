@@ -1,3 +1,4 @@
+// src/core/types.ts
 export type State = Record<string, any>;
 
 export type Path = string;

@@ -1,4 +1,4 @@
-// store.ts
+// src/core/store.ts
 import { State, Path, Store, BatchUpdate, StoreOptions, Subscriber } from './types';
 import { get, set, clone } from './utils';
 
