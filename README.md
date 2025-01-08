@@ -4,9 +4,12 @@ A powerful and hopefully simple state management library for React.
 
 ## Motivation
 
-State management shouldn't be complicated. Period.
+### Why Another State Manager?
+Most state managers claim to solve Redux's problems but end up doing the same things as Redux. Spyn takes a fundamentally different approach:
 
-While Redux offers great dev tools and predictable updates, and MobX provides elegant reactivity, they both come with significant learning curves and boilerplate (Redux has tons of it and it's extremely frustrating to use- or maybe I'm just dumb). We built Spyn because we believe you shouldn't need to learn actions, reducers, observables, or complex patterns just to manage your app's state.
+### State management shouldn't be complicated .
+
+While Redux offers great dev tools and predictable updates, and MobX provides elegant reactivity, they both come with significant learning curves and boilerplate (Redux has tons of it and it's extremely frustrating to use- or maybe I'm just dumb). We built Spyn because we believe you shouldn't need to learn actions, reducers, observables, or complex patterns just to manage your app's state. There's enough s**t to do, and am trying not to make it even more difficult than it has to be.
 
 ## Why Spyn?
 
@@ -18,6 +21,58 @@ While Redux offers great dev tools and predictable updates, and MobX provides el
 - 🎨 **TypeScript** ready
 - 0️⃣ Minimal configuration
 
+## Key features
+
+### 1. Automatic Dependency Tracking
+
+```
+// Other libraries: Manual dependency declaration
+const selectFullName = createSelector(
+  [selectFirstName, selectLastName],
+  (first, last) => `${first} ${last}`
+);
+
+// Spyn: Automatic tracking
+const fullName = store.computed('fullName', state => {
+  return `${state.user.firstName} ${state.user.lastName}`;
+});
+```
+
+### 2. Bidirectional middleware
+```
+store.use({
+  onSet: (path, value, prevValue) => {
+    console.log(`Setting ${path}: ${prevValue} -> ${value}`);
+    return value;
+  },
+  onGet: (path, value) => {
+    console.log(`Reading ${path}: ${value}`);
+    return value;
+  }
+});
+```
+
+### 3. Caching
+
+Computed values are cached using an LRU strategy:
+
+`const computedCache = new LRUCache<string, any>(50);`
+
+This provides optimal performance while preventing memory leaks.
+
+### 4. Dependency tracking
+
+Spyn uses ES6 Proxies to automatically track dependencies in computed values:
+
+```
+const proxy = new Proxy(state, {
+  get(target, prop: string) {
+    trackDependency(prop, path);
+    return target[prop as keyof typeof target];
+  }
+});
+```
+
 ## Installation
 
 `npm install spyn`
@@ -26,90 +81,149 @@ While Redux offers great dev tools and predictable updates, and MobX provides el
 
 ## Quick Start
 
-## Example 1: 
+## Simple Example: 
 
 ```
-import { createStore, Provider, useStore } from 'spyn';
+// 1. Create stores
+const userStore = createStore({
+  user: null,
+  theme: 'light'
+});
 
-// 1. Create store
-const store = createStore({
-  notifications: {
-    isEnabled: false,
-    token: null,
-    settings: {
-      email: true,
-      push: true,
-      marketing: false
-    }
+const cartStore = createStore({
+  items: []
+});
+
+// 2. Use them
+function App() {
+  return (
+    <Provider store={userStore}>
+      <Provider store={cartStore}>
+        <YourApp />
+      </Provider>
+    </Provider>  
+  );
+}
+
+// 3. That's it..
+function Profile() {
+  const { user } = useStore(store => ({
+    user: store.get('user')
+  }));
+
+  return (
+    <button onClick={() => store.set('theme', 'dark')}>
+      Hi {user?.name}!
+    </button>
+  );
+}
+```
+
+## Real world example:
+
+```
+// userStore.ts - All the user's data
+const userStore = createStore({
+  profile: null,
+  preferences: {
+    theme: 'light',
+    language: 'en'
   }
 });
 
-// 2. Wrap app
+// featureStore.ts 
+const featureStore = createStore({
+  features: {
+    newDashboard: false,
+    betaFeatures: false
+  }
+});
+
+// notificationStore.ts - noti center thingy
+const notificationStore = createStore({
+  notifications: [],
+  settings: {
+    email: true,
+    push: true
+  }
+});
+
+// App.tsx
 function App() {
   return (
-    <Provider store={store}>
-      <NotificationSettings />
+    <Provider store={userStore}>
+      <Provider store={featureStore}>
+        <Provider store={notificationStore}>
+          <Header />
+          <MainContent />
+          <NotificationCenter />
+        </Provider>
+      </Provider>
     </Provider>
   );
 }
 
-// 3. Use it
-function NotificationSettings() {
-  const { settings, isEnabled } = useStore(store => ({
-    settings: store.get('notifications.settings'),
-    isEnabled: store.get('notifications.isEnabled')
+// Header.tsx
+function Header() {
+  // Only cares about user stuff - just use the hook directly
+  const { profile, preferences } = useStore(store => ({
+    profile: store.get('profile'),
+    preferences: store.get('preferences')
   }));
 
-  const toggleNotification = async (type) => {
-    try {
-      await updateNotificationPreference(type);
-      
-      // spyn
-      store.set(`notifications.settings.${type}`, !settings[type]);
-    } catch (error) {
-    }
-  };
+  return (
+    <header>
+      <h1>Welcome {profile?.name}</h1>
+      <ThemeToggle current={preferences.theme} />
+    </header>
+  );
+}
+
+// NotificationCenter.tsx
+function NotificationCenter() {
+  // Only subscribes to notification updates - clean and simple!!
+  const { notifications } = useStore(store => ({
+    notifications: store.get('notifications')
+  }));
 
   return (
     <div>
-      <div>
-        <input 
-          type="checkbox"
-          checked={settings.email}
-          onChange={() => toggleNotification('email')}
-        />
-        Email Notifications
-      </div>
-
-      <div>
-        <input 
-          type="checkbox"
-          checked={settings.push}
-          onChange={() => toggleNotification('push')}
-        />
-        Push Notifications
-      </div>
+      {notifications.map(note => (
+        <Alert key={note.id}>{note.message}</Alert>
+      ))}
     </div>
   );
+}
+
+// FeatureGate.tsx
+function FeatureGate({ feature, children }) {
+  // checks feature flags ONLY - direct path access - clean and simple!!!
+  const isEnabled = useStore(store => 
+    store.get(`features.${feature}`)
+  );
+
+  return isEnabled ? children : null;
 }
 ```
 
 ## Core Concepts
 
-### Simple but Powerful API
+###  Direct state access
 
-Get values:
 ```
-const value = store.get('some.deep.path');
+// Get values
+const name = store.get('user.name');
+const theme = store.get('preferences.theme');
+
+// Set values
+store.set('user.name', 'John');
+store.set('preferences.theme', 'dark');
 ```
 
-Set values:
-```
-store.set('some.deep.path', newValue);
-```
+### Atomic updates
 
+```
 Batch updates:
-```
 store.batch([
   ['user', newUser],
   ['theme', 'dark'],
@@ -117,7 +231,19 @@ store.batch([
 ]);
 ```
 
-### Performance Optimizations
+### Store connections
+
+```
+// Automatically sync stores
+connectStores([{
+  source: userStore,
+  target: preferencesStore,
+  when: store => store.get('user.loggedIn'),
+  then: target => target.set('theme', 'user-preferred-theme')
+}]);
+```
+
+### Performance optimizations
 
 Use selectors to prevent unnecessary rerenders:
 ```
@@ -129,19 +255,6 @@ const { user, theme } = useStore(store => ({
   user: store.get('user'),
   theme: store.get('theme')
 }));
-```
-
-### Deep Updates Made Easy
-
-```
-// No need for deep spreads or immer
-store.set('deeply.nested.value', newValue);
-
-// Batch deep updates
-store.batch([
-  ['user.settings.theme', 'dark'],
-  ['user.preferences.notifications', true]
-]);
 ```
 
 ## Why use Spyn?
@@ -176,65 +289,21 @@ Spyn is built on three key principles:
 
 1. **React Context + Proxy Magic**: We are using React Context for the provider system. We further enhance it with ES6 Proxies for an easier experience.
 
-2. **Updates**: All state updates are batched and optimized automatically. Components only rerender when their selected data actually changes.
+2. **Optimized Updates**: All state updates are batched and optimized automatically. 
+
+* Component only rerenders when their selected data actually changes. 
+* Automatic memoization
+* LRU caching
 
 3. **Developer Experience**: We provide Redux DevTools integration, TypeScript support, and a simple mental model while handling complex state management patterns under the hood.
 
-## Advanced Usage
+4. **Everything in Spyn is built on these fundamentals** :
 
-### Async Actions
-```
-function UserProfile() {
-  const store = useStore();
-
-  const fetchUser = async (id) => {
-    store.set('loading', true);
-    try {
-      const user = await api.getUser(id);
-      store.batch([
-        ['user', user],
-        ['loading', false],
-        ['error', null]
-      ]);
-    } catch (error) {
-      store.batch([
-        ['error', error.message],
-        ['loading', false]
-      ]);
-    }
-  };
-}
-```
-
-### Form Handling
-```
-function ComplexForm() {
-  const store = useStore();
-
-  const updateField = (field, value) => {
-    store.batch([
-      [`form.${field}`, value],
-      ['form.dirty', true],
-      ['form.valid', validateForm()]
-    ]);
-  };
-}
-```
-
-### Real-time Updates
-```
-function LiveDashboard() {
-  const store = useStore();
-
-  useEffect(() => {
-    const socket = new WebSocket('...');
-    socket.onmessage = (event) => {
-      const { path, value } = JSON.parse(event.data);
-      store.set(path, value);
-    };
-  }, []);
-}
-```
+* Zero-config setup
+* Automatic performance optimizations
+* Type safety throughout
+* Predictable updates
+* Better dev experience (or hopefully?)
 
 ## Best Practices
 

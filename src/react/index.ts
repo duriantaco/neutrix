@@ -1,38 +1,47 @@
-// src/react/index.ts
 import React from 'react';
-import type { Store } from '../core/types';
+import type { Store, State } from '../core/types';
 
-const StoreContext: React.Context<Store | null> = React.createContext<Store | null>(null);
+export const StoreContext = React.createContext<Store<State> | null>(null);
 
-interface ProviderProps extends React.PropsWithChildren<{ store: Store }> {}
-
-export const Provider: React.FC<ProviderProps> = ({ store, children }) => 
-  React.createElement(StoreContext.Provider, { value: store }, children);
-
-// implement hook
-function useStoreContext(): Store {
-  const context = React.useContext(StoreContext);
-  if (context === null) {
-    throw new Error('useStore must be used within Provider');
-  }
-  return context;
+interface StoreProviderProps<T extends State> {
+  store: Store<T>;
+  children: React.ReactNode;
 }
 
-export function useStore(): Store;
-export function useStore<T>(selector: (store: Store) => T): T;
-export function useStore<T = Store>(selector?: (store: Store) => T): T {
-  const store = useStoreContext();
+export const StoreProvider = <T extends State>({ 
+  store, 
+  children 
+}: StoreProviderProps<T>): JSX.Element => 
+  React.createElement(StoreContext.Provider, { value: store }, children);
+
+export function useStoreContext<T extends State>(): Store<T> {
+  const context = React.useContext(StoreContext);
+  if (context === null) {
+    throw new Error('useStore must be used within StoreProvider');
+  }
+  return context as Store<T>;
+}
+
+// may have a duplicate here. havent checked but will check later
+export function useStore<T extends State>(): Store<T>;
+export function useStore<T extends State, R>(selector: (store: Store<T>) => R): R;
+export function useStore<T extends State, R = Store<T>>(
+  selector?: (store: Store<T>) => R
+): R {
+  const store = useStoreContext<T>();
   
-  const [state, setState] = React.useState<T>(() => 
-    selector ? selector(store) : store as T
+  const [state, setState] = React.useState<R>(() => 
+    selector ? selector(store) : store as R
   );
 
   React.useEffect(() => {
     const unsubscribe = store.subscribe(() => {
-      setState(selector ? selector(store) : store as T);
+      setState(selector ? selector(store) : store as R);
     });
     return unsubscribe;
   }, [store, selector]);
 
   return state;
 }
+
+export * from './hooks';
