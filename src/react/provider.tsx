@@ -1,15 +1,22 @@
-import React from 'react';
-import type { Store } from '../core/types';
+// src/react/provider.tsx
+import React, { createContext, useEffect } from 'react';
+import type { Store, State } from '../../src/core/types';
 
-export const StoreContext = React.createContext<Store<any>>(null!);
+export const StoreContext = createContext<Store<any> | null>(null);
 
-interface ProviderProps {
-  store: Store<any>;
+export interface ProviderProps<T extends State = State> {
+  store: Store<T>;
   children: React.ReactNode;
 }
 
-export function Provider(props: ProviderProps) {
-  return (
-    React.createElement(StoreContext.Provider, { value: props.store }, props.children)
-  );
-}
+export const Provider = <T extends State = State>({ 
+  store, 
+  children 
+}: ProviderProps<T>): React.ReactElement => {
+  useEffect(() => {
+    return store.subscribe(() => {
+    });
+  }, [store]);
+
+  return React.createElement(StoreContext.Provider, { value: store }, children);
+};

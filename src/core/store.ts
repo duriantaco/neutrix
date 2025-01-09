@@ -1,3 +1,4 @@
+// src/core/store.ts
 import { State, Store, StoreOptions, BatchUpdate, ComputedFn, Action } from './types';
 import { get, set } from './utils';
 import { Middleware } from './types';
@@ -39,8 +40,8 @@ export function createStore<T extends State>(
     if (savedState) {
       try {
         const parsed = JSON.parse(savedState);
-        state = typeof options.persist === 'function' 
-          ? options.persist(parsed) 
+        state = typeof options.persist === 'function'
+          ? options.persist(parsed)
           : parsed;
       } catch (e) {
         console.warn('Failed to load persisted state:', e);
@@ -51,12 +52,12 @@ export function createStore<T extends State>(
   const updateDevTools = (action: string) => {
     if (devTools) {
       devTools.send(action, state);
-      if (options.persist) {
-        const stateToSave = typeof options.persist === 'function'
-          ? options.persist(state)
-          : state;
-        localStorage.setItem(options.name || 'enhanced-store', JSON.stringify(stateToSave));
-      }
+    }
+    if (options.persist) {
+      const stateToSave = typeof options.persist === 'function'
+        ? options.persist(state)
+        : state;
+      localStorage.setItem(options.name || 'enhanced-store', JSON.stringify(stateToSave));
     }
   };
 
@@ -81,7 +82,9 @@ export function createStore<T extends State>(
     get: <K extends keyof T>(path: K | string): T[K] => {
       let value = get(state, path as string);
       middlewares.forEach(m => {
-        if (m.onGet) value = m.onGet(path as string, value);
+        if (m.onGet) {
+          value = m.onGet(path as string, value);
+        }
       });
       return value;
     },
@@ -91,7 +94,9 @@ export function createStore<T extends State>(
       let nextValue = value;
       
       middlewares.forEach(m => {
-        if (m.onSet) nextValue = m.onSet(path as string, nextValue, prevValue);
+        if (m.onSet) {
+          nextValue = m.onSet(path as string, nextValue, prevValue);
+        }
       });
 
       if (nextValue !== prevValue) {
@@ -105,15 +110,17 @@ export function createStore<T extends State>(
       const affectedPaths = new Set<string>();
 
       updates.forEach(([path, value]) => {
-        if (get(state, path) !== value) {
+        const prevValue = get(state, path);
+        if (value !== prevValue) {
           state = set(state, path, value) as T;
           affectedPaths.add(path);
         }
       });
 
       if (affectedPaths.size > 0) {
-        notify();
+       
         updateDevTools('Batch Update');
+        notify();
       }
     },
 
@@ -121,7 +128,9 @@ export function createStore<T extends State>(
       middlewares.push(middleware);
       return () => {
         const index = middlewares.indexOf(middleware);
-        if (index > -1) middlewares.splice(index, 1);
+        if (index > -1) {
+          middlewares.splice(index, 1);
+        }
       };
     },
 
@@ -141,7 +150,6 @@ export function createStore<T extends State>(
               return target[prop as keyof typeof target];
             }
           });
-          
           computedCache.set(path, fn(proxy as T));
         }
         return computedCache.get(path);
@@ -160,13 +168,11 @@ export function createStore<T extends State>(
 
     suspend: <R>(promise: Promise<R>): R => {
       const cache = new Map<Promise<R>, R>();
-      
       if (!cache.has(promise)) {
         throw promise.then(value => {
           cache.set(promise, value);
         });
       }
-      
       return cache.get(promise)!;
     }
   };
@@ -174,9 +180,9 @@ export function createStore<T extends State>(
   return new Proxy(store, {
     get(target, prop: string | symbol) {
       if (prop in target) {
-        return target[prop as keyof typeof target];
+        return Reflect.get(target, prop);
       }
-      return get(state, prop as string);
+      return get(state, String(prop));
     }
   });
 }

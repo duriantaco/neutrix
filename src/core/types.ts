@@ -1,3 +1,4 @@
+// types.ts
 export type Primitive = string | number | boolean | null | undefined;
 export type DeepPartial<T> = T extends Primitive
   ? T
@@ -24,12 +25,8 @@ export interface Middleware {
   onBatch?: (updates: BatchUpdate) => BatchUpdate;
   onError?: (error: Error) => void;
 }
-
-export interface State {
-    [key: string]: any;
-  }
   
-  export interface StoreOptions {
+export interface StoreOptions {
     name?: string;
     devTools?: boolean;
     persist?: boolean | ((state: any) => any);
@@ -37,7 +34,7 @@ export interface State {
   
 export type BatchUpdate = Array<[string, any]>;
   
-export interface Store<T extends State> {
+export interface Store<T extends State = State> {
     get<K extends keyof T>(path: K | string): T[K];
     set<K extends keyof T>(path: K | string, value: T[K]): void;
     batch(updates: BatchUpdate): void;
@@ -47,7 +44,11 @@ export interface Store<T extends State> {
     action<Args extends any[], Result>(fn: Action<Args, Result>): (...args: Args) => Promise<Result>;
     suspend<R>(promise: Promise<R>): R;
     use(middleware: Middleware): () => void;
-}
+  }
+  
+  export interface State {
+    [key: string]: any;
+  }
   
 export type Action<Args extends any[], Result> = (store: any, ...args: Args) => Promise<Result>;
   

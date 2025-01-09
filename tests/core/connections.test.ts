@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { connectStores, connectStore } from '../../src/core/connections';
 import { StoreConnection, State } from '../../src/core/types';
 
-// Update the mock so that `target` is destructured properly and unsubscribes are returned
 vi.mock('../../src/core/connections', () => ({
     connectStores: vi.fn((connections) => {
         const unsubscribes: Array<() => void> = [];
@@ -18,7 +17,6 @@ vi.mock('../../src/core/connections', () => ({
                 handler();
             }
         });
-        // Return a function to call all unsubscribes
         return () => {
             unsubscribes.forEach(fn => fn());
         };

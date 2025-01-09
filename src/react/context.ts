@@ -1,3 +1,4 @@
+// context.ts
 import { createContext, useContext } from 'react';
 import type { Store, State } from '../core/types';
 
