@@ -95,7 +95,7 @@ describe('useStore', () => {
   describe('useAction', () => {
     it('should handle async actions', async () => {
       const action = vi.fn(async (store: Store<TestState>, value: number) => {
-        await new Promise(resolve => setTimeout(resolve, 0)); // Simulate async
+        await new Promise(resolve => setTimeout(resolve, 0)); 
         const current = store.get('counter');
         store.set('counter', current + value);
         return current + value;

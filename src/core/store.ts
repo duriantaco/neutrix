@@ -19,8 +19,29 @@ export function createStore<T extends State>(
   const subscribers = new Set<() => void>();
   const middlewares: Middleware[] = [];
   const dependencyGraph = new Map<string, Set<string>>();
+  const suspenseCache = new Map<Promise<any>, any>();
+
+  if (options.validate) {
+    const validationResult = options.validate(state);
+    if (typeof validationResult === 'string') {
+      throw new Error(`Initial state validation failed: ${validationResult}`);
+    } else if (!validationResult) {
+      throw new Error('Initial state validation failed');
+    }
+  }
+
+  const cleanupDependencies = (path: string) => {
+    const deps = dependencyGraph.get(path);
+    if (deps) {
+      deps.forEach(dep => {
+        computedCache.delete(dep);
+      });
+      dependencyGraph.delete(path);
+    }
+  };
 
   let devTools: any;
+  try{
   if (options.devTools && window.__REDUX_DEVTOOLS_EXTENSION__) {
     devTools = window.__REDUX_DEVTOOLS_EXTENSION__.connect({
       name: options.name || 'Enhanced Store',
@@ -34,32 +55,71 @@ export function createStore<T extends State>(
     });
     devTools.init(state);
   }
+    } catch (e) {
+    console.warn('DevTools initialization failed:', e);
+  }
 
   if (options.persist) {
     const savedState = localStorage.getItem(options.name || 'enhanced-store');
     if (savedState) {
       try {
-        const parsed = JSON.parse(savedState);
-        state = typeof options.persist === 'function'
+        let parsed = JSON.parse(savedState);
+        if (options.migration) {
+            const savedVersion = parsed.__version || 0;
+            if (savedVersion < options.migration.version) {
+              parsed = options.migration.migrate(parsed);
+              parsed.__version = options.migration.version;
+            }
+          }
+          state = typeof options.persist === 'function'
           ? options.persist(parsed)
           : parsed;
+
+        if (options.validate) {
+          const validationResult = options.validate(state);
+          if (typeof validationResult === 'string') {
+            throw new Error(`Migrated state validation failed: ${validationResult}`);
+          } else if (!validationResult) {
+            throw new Error('Migrated state validation failed');
+          }
+        }
       } catch (e) {
-        console.warn('Failed to load persisted state:', e);
+        console.warn('Failed to load/migrate persisted state:', e);
+        state = { ...initialState }; 
       }
     }
   }
 
-  const updateDevTools = (action: string) => {
-    if (devTools) {
-      devTools.send(action, state);
-    }
-    if (options.persist) {
-      const stateToSave = typeof options.persist === 'function'
-        ? options.persist(state)
-        : state;
-      localStorage.setItem(options.name || 'enhanced-store', JSON.stringify(stateToSave));
+  const validateState = (newState: T) => {
+    if (options.validate) {
+      const validationResult = options.validate(newState);
+      if (typeof validationResult === 'string') {
+        throw new Error(`State validation failed: ${validationResult}`);
+      } else if (!validationResult) {
+        throw new Error('State validation failed');
+      }
     }
   };
+
+  const updateDevTools = (action: string) => {
+    if (devTools) {
+      try {
+        devTools.send(action, state);
+      } catch (e) {
+        console.warn('DevTools update failed:', e);
+      }
+    }
+    if (options.persist) {
+      try {
+        const stateToSave = typeof options.persist === 'function'
+          ? options.persist(state)
+          : state;
+        localStorage.setItem(options.name || 'enhanced-store', JSON.stringify(stateToSave));
+      } catch (e) {
+        console.warn('Failed to persist state:', e);
+      }
+    }
+};
 
   const notify = (path?: string) => {
     if (path) {
@@ -100,7 +160,11 @@ export function createStore<T extends State>(
       });
 
       if (nextValue !== prevValue) {
-        state = set(state, path as string, nextValue) as T;
+        const newState = set(state, path as string, nextValue) as T;
+        validateState(newState);
+        
+        cleanupDependencies(path as string);
+        state = newState;
         notify(path as string);
         updateDevTools(`Set ${String(path)}`);
       }
@@ -108,19 +172,29 @@ export function createStore<T extends State>(
 
     batch: (updates: BatchUpdate): void => {
       const affectedPaths = new Set<string>();
+      const newState = { ...state };
 
-      updates.forEach(([path, value]) => {
-        const prevValue = get(state, path);
-        if (value !== prevValue) {
-          state = set(state, path, value) as T;
-          affectedPaths.add(path);
+      try {
+        updates.forEach(([path, value]) => {
+          const prevValue = get(newState, path);
+          if (value !== prevValue) {
+            const updatedState = set(newState, path, value) as T;
+            validateState(updatedState);
+            
+            Object.assign(newState, updatedState);
+            cleanupDependencies(path);
+            affectedPaths.add(path);
+          }
+        });
+
+        if (affectedPaths.size > 0) {
+          state = newState;
+          updateDevTools('Batch Update');
+          notify();
         }
-      });
-
-      if (affectedPaths.size > 0) {
-       
-        updateDevTools('Batch Update');
-        notify();
+      } catch (error) {
+        console.error('Batch update failed:', error);
+        throw error;
       }
     },
 
@@ -142,38 +216,56 @@ export function createStore<T extends State>(
     getState: () => ({ ...state }),
 
     computed: <R>(path: string, fn: (state: T) => R): ComputedFn<R> => {
-      return () => {
-        if (!computedCache.has(path)) {
-          const proxy = new Proxy(state, {
-            get(target, prop: string) {
-              trackDependency(prop, path);
-              return target[prop as keyof typeof target];
+        const computationStack = new Set<string>();
+            
+        return () => {
+          if (computationStack.has(path)) {
+            throw new Error(`Circular dependency detected in computed value "${path}"`);
+          }
+      
+          if (!computedCache.has(path)) {
+            computationStack.add(path);
+            
+            try {
+              const proxy = new Proxy(state, {
+                get(target, prop: string) {
+                  trackDependency(prop, path);
+                  return target[prop as keyof typeof target];
+                }
+              });
+              
+              computedCache.set(path, fn(proxy as T));
+            } finally {
+              computationStack.delete(path);
             }
-          });
-          computedCache.set(path, fn(proxy as T));
-        }
-        return computedCache.get(path);
-      };
-    },
+          }
+          return computedCache.get(path);
+        };
+        },
 
     action: <Args extends any[], Result>(
       fn: Action<Args, Result>
     ) => {
       return async (...args: Args): Promise<Result> => {
-        const result = await fn(store, ...args);
-        updateDevTools(`Action ${fn.name || 'Anonymous'}`);
-        return result;
+        try {
+          const result = await fn(store, ...args);
+          updateDevTools(`Action ${fn.name || 'Anonymous'}`);
+          return result;
+        } catch (error) {
+          console.error(`Action failed:`, error);
+          throw error;
+        }
       };
     },
 
+
     suspend: <R>(promise: Promise<R>): R => {
-      const cache = new Map<Promise<R>, R>();
-      if (!cache.has(promise)) {
+      if (!suspenseCache.has(promise)) {
         throw promise.then(value => {
-          cache.set(promise, value);
+          suspenseCache.set(promise, value);
         });
       }
-      return cache.get(promise)!;
+      return suspenseCache.get(promise)!;
     }
   };
 

@@ -30,7 +30,13 @@ export interface StoreOptions {
     name?: string;
     devTools?: boolean;
     persist?: boolean | ((state: any) => any);
-  }
+    validate?: (state: State) => boolean | string; 
+    migration?: {                                  
+    version: number;
+    migrate: (oldState: any) => any;
+  };
+}
+  
   
 export type BatchUpdate = Array<[string, any]>;
   

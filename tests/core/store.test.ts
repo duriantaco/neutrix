@@ -111,6 +111,103 @@ describe('createStore', () => {
     });
 });
 
+describe('Store validation and migration', () => {
+    it('should validate initial state', () => {
+      const validator = (state: any) => state.count >= 0;
+      
+      expect(() => createStore({ count: -1 }, { validate: validator }))
+        .toThrow('Initial state validation failed');
+      
+      const store = createStore({ count: 0 }, { validate: validator });
+      expect(store.get('count')).toBe(0);
+    });
+  
+    it('should handle state migration', () => {
+      localStorage.setItem('test-store', JSON.stringify({ 
+        oldField: 'value',
+        __version: 0 
+      }));
+  
+      const store = createStore(
+        { newField: '' },
+        {
+          name: 'test-store',
+          persist: true,
+          migration: {
+            version: 1,
+            migrate: (oldState: any) => ({
+              newField: oldState.oldField
+            })
+          }
+        }
+      );
+  
+      expect(store.get('newField')).toBe('value');
+    });
+
+    it('should cleanup computed dependencies when state changes', () => {
+        const store = createStore({ a: 1, b: 2 });
+        const sum = store.computed('sum', state => state.a + state.b);
+        
+        expect(sum()).toBe(3);
+        store.set('a', 2);
+        expect(sum()).toBe(4);
+      });
+
+      it('should detect circular dependencies in computed values', () => {
+        const store = createStore({ a: 1 });
+        const computed1 = store.computed('computed1', state => computed2());
+        const computed2 = store.computed('computed2', state => computed1());
+        
+        expect(() => computed1()).toThrow('Circular dependency detected');
+      });
+
+      it('should handle DevTools errors gracefully', () => {
+        const mockDevTools = {
+          connect: () => ({ 
+            init: () => { throw new Error('DevTools error') }
+          })
+        };
+        
+        window.__REDUX_DEVTOOLS_EXTENSION__ = mockDevTools;
+        
+        expect(() => createStore({ count: 0 }, { devTools: true }))
+          .not.toThrow();
+      });
+
+      it('should fallback to initial state if persisted state fails validation', () => {
+        localStorage.setItem('test-store', JSON.stringify({ count: -1 }));
+        
+        const store = createStore(
+          { count: 0 },
+          {
+            name: 'test-store',
+            persist: true,
+            validate: state => state.count >= 0
+          }
+        );
+        
+        expect(store.getState()).toEqual({ count: 0 });
+      });
+
+  
+    it('should handle batch update failures', () => {
+      const store = createStore(
+        { count: 0 },
+        { 
+          validate: (state: any) => state.count < 10 
+        }
+      );
+  
+      expect(() => store.batch([
+        ['count', 5],
+        ['count', 15]
+      ])).toThrow();
+  
+      expect(store.get('count')).toBe(0);
+    });
+  });
+
 export function optimizePath(path: string | number | symbol): string[] {
     const pathStr = String(path);
     return pathStr.split('.').reduce<string[]>((acc, part) => {

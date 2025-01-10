@@ -2,7 +2,14 @@ export class LRUCache<K, V> {
   private cache = new Map<K, V>();
   private maxSize: number;
 
+  size(): number {
+    return this.cache.size;
+  }
+
   constructor(maxSize = 100) {
+    if (maxSize <= 0) {
+      throw new Error('Cache size must be greater than 0');
+    }
     this.maxSize = maxSize;
   }
 
