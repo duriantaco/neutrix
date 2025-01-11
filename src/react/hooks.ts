@@ -3,49 +3,45 @@ import { useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { Store, State } from '../core/types';
 import { StoreContext } from './provider';
 
-export function useStore<S extends State, T>(selector: (store: Store<S>) => T): T {
-  const store = useContext(StoreContext) as Store<S>;
-  const selectorRef = useRef(selector);
-  selectorRef.current = selector;
-
-  const [value, setValue] = useState(() => selector(store));
-
-  useEffect(() => {
-    setValue(selectorRef.current(store));
-
-    const unsubscribe = store.subscribe(() => {
+export function useStore<S extends State, R>(selector: (store: Store<S>) => R): R {
+    const store = useContext(StoreContext) as Store<S>;
+    const selectorRef = useRef(selector);
+    selectorRef.current = selector;
+  
+    const [value, setValue] = useState(() => selector(store));
+  
+    useEffect(() => {
       setValue(selectorRef.current(store));
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [store]);
-
-  return value;
+  
+      const unsubscribe = store.subscribe(() => {
+        setValue(selectorRef.current(store));
+      });
+  
+      return unsubscribe;
+    }, [store]);
+  
+    return value;
 }
-
-export function useComputed<S extends State, T>(compute: (store: Store<S>) => T): T {
-  const store = useContext(StoreContext) as Store<S>;
-  const computeRef = useRef(compute);
-  computeRef.current = compute;
-
-  const [value, setValue] = useState(() => compute(store));
-
-  useEffect(() => {
-    setValue(computeRef.current(store));
-
-    const unsubscribe = store.subscribe(() => {
+  
+export function useComputed<S extends State, R>(compute: (store: Store<S>) => R): R {
+    const store = useContext(StoreContext) as Store<S>;
+    const computeRef = useRef(compute);
+    computeRef.current = compute;
+  
+    const [value, setValue] = useState(() => compute(store));
+  
+    useEffect(() => {
       setValue(computeRef.current(store));
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [store]);
-
-  return value;
-}
+  
+      const unsubscribe = store.subscribe(() => {
+        setValue(computeRef.current(store));
+      });
+  
+      return unsubscribe;
+    }, [store]);
+  
+    return value;
+  }
 
 interface ActionState<E = Error> {
   loading: boolean;
