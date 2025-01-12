@@ -1,6 +1,7 @@
 {
   "name": "neutrix",
   "version": "0.0.0",
+  "license": "MIT",
   "type": "module",
   "main": "./dist/neutrix.umd.js",
   "module": "./dist/neutrix.es.js",
