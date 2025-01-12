@@ -1,6 +1,6 @@
 // storeExample.ts
-import { createStore } from 'spyn'
-import type { State } from 'spyn'
+import { createStore } from 'neutrix'
+import type { State } from 'neutrix'
 
 export interface Product {
   id: number

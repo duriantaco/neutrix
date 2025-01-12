@@ -1,10 +1,10 @@
-# Building an E-commerce App with Spyn
+# Building an E-commerce App with neutrix
 
 ## Introduction
 
-In this tutorial, we'll build a complete e-commerce application using Spyn for state management. You'll learn how to:
+In this tutorial, we'll build a complete e-commerce application using neutrix for state management. You'll learn how to:
 
-* Set up a Spyn store with TypeScript
+* Set up a neutrix store with TypeScript
 * Manage shopping cart state
 * Create computed values for calculations
 * Persist user's cart data
@@ -23,7 +23,7 @@ We do have a full working example inside /examples so you can clone it into your
 ```
 npm create vite@latest shop-app -- --template react-ts
 cd shop-app
-npm install spyn react-router-dom
+npm install neutrix react-router-dom
 ```
 
 ## Core components
@@ -41,7 +41,7 @@ Core Components:
 
 ### Setting up the store
 
-1. First, we define the structure of our data. Every product in our store has three basic properties: an ID, a name, and price. The store holds three main pieces of information. It keeps track of all our products, manages our shopping cart, and handles some UI states like whether the cart drawer is visible. Spyn needs these TypeScript interfaces to properly type our store data.
+1. First, we define the structure of our data. Every product in our store has three basic properties: an ID, a name, and price. The store holds three main pieces of information. It keeps track of all our products, manages our shopping cart, and handles some UI states like whether the cart drawer is visible. neutrix needs these TypeScript interfaces to properly type our store data.
 
 ```
 export interface Product {
@@ -59,7 +59,7 @@ export interface ShopState extends State {
 }
 ```
 
-2. When we create the store with persist: true, Spyn automatically handles saving our cart data to localStorage - so if someone refreshes their browser, they won't lose their cart items.
+2. When we create the store with persist: true, neutrix automatically handles saving our cart data to localStorage - so if someone refreshes their browser, they won't lose their cart items.
 
 ```
 // Sample products data
@@ -84,7 +84,7 @@ export const store = createStore<ShopState>(initialState, {
 })
 ```
 
-3. For the cart portion, instead of keeping an array of items, we use an object where each key is a product ID and each value is the quantity. This makes it super easy to update quantities without having to search through arrays. When we want to modify the cart, we use Spyn's `store.get()` to grab the current cart state and `store.set()` to update it. Spyn will automatically notify any components using this cart data that they need to update.
+3. For the cart portion, instead of keeping an array of items, we use an object where each key is a product ID and each value is the quantity. This makes it super easy to update quantities without having to search through arrays. When we want to modify the cart, we use neutrix's `store.get()` to grab the current cart state and `store.set()` to update it. neutrix will automatically notify any components using this cart data that they need to update.
 
 ```
 export const addToCart = (productId: number) => {
@@ -108,7 +108,7 @@ export const removeFromCart = (productId: number) => {
 }
 ```
 
-4. Finally, we use Spyn's `computed` feature to create a value that automatically recalculates when the cart changes. Any component using this cartTotal will automatically re-render when needed. It tracks dependencies and updates only when necessary.
+4. Finally, we use neutrix's `computed` feature to create a value that automatically recalculates when the cart changes. Any component using this cartTotal will automatically re-render when needed. It tracks dependencies and updates only when necessary.
 
 ```
 export const cartTotal = store.computed('cartTotal', (state: ShopState) => {
@@ -126,8 +126,8 @@ Full example below:
 
 ```
 // storeExample.ts
-import { createStore } from 'spyn'
-import type { State } from 'spyn'
+import { createStore } from 'neutrix'
+import type { State } from 'neutrix'
 
 // Define our Product type
 export interface Product {
@@ -208,10 +208,10 @@ export const cartTotal = store.computed('cartTotal', (state: ShopState) => {
 
 ### Setting up the Header
 
-This part is the most straightforward. We'll use Spyn's `useStore` hook to subscribe to our cartTotal computed value. When the cart changes, Spyn will automatically update our total value. 
+This part is the most straightforward. We'll use neutrix's `useStore` hook to subscribe to our cartTotal computed value. When the cart changes, neutrix will automatically update our total value. 
 
 ```
-import { useStore } from 'spyn'
+import { useStore } from 'neutrix'
 import { cartTotal, toggleCart } from './storeExample'
 import type { ShopState } from './storeExample'
 
@@ -239,7 +239,7 @@ export function Header() {
 
 1. Component Setup and Store Connection
 
-First, we hook up our component to all the store data it needs. Spyn will automatically re-render the component when values change.
+First, we hook up our component to all the store data it needs. neutrix will automatically re-render the component when values change.
 
 ```
 export function CartDrawer() {
@@ -255,7 +255,7 @@ Full code below:
 
 ```
 // CartDrawer.tsx
-import { useStore } from 'spyn'
+import { useStore } from 'neutrix'
 import { cartTotal, toggleCart, removeFromCart } from './storeExample'
 import type { ShopState, Product } from './storeExample'
 
@@ -308,7 +308,7 @@ export function CartDrawer() {
 
 ### Shop Content
 
-1. The ShopContent component needs access to products and cart data. Again, we use Spyn's useStore to connect to our store:
+1. The ShopContent component needs access to products and cart data. Again, we use neutrix's useStore to connect to our store:
 
 ```
 const products = useStore<ShopState, Product[]>(store => store.get('products'))
@@ -325,7 +325,7 @@ const products = useStore<ShopState, Product[]>(store => store.get('products'))
 </div>
 ```
 
-The `useStore` hook gets the products list. When addToCart is called, it updates the Spyn store and components using cart data will automatically update
+The `useStore` hook gets the products list. When addToCart is called, it updates the neutrix store and components using cart data will automatically update
 
 2. Multiple `useStore` hooks track cart items and total. The Cart display updates instantly when items are added or removed. Computed total recalculates automatically and will only shows products with quantities that are greater than 0.
 
@@ -356,7 +356,7 @@ const total = useStore<ShopState, number>(() => cartTotal())
 Full code below:
 
 ```
-import { useStore } from 'spyn'
+import { useStore } from 'neutrix'
 import { addToCart, removeFromCart, cartTotal } from './storeExample'
 import type { ShopState, Product } from './storeExample'
 
@@ -403,7 +403,7 @@ export function ShopContent() {
 
 ## Wish list
 
-1. The WishList component shows what items are currently in the cart. We use Spyn's `useStore` to track cart and product data:
+1. The WishList component shows what items are currently in the cart. We use neutrix's `useStore` to track cart and product data:
 
 ```
 const products = useStore<ShopState, Product[]>(store => store.get('products'))
@@ -420,7 +420,7 @@ const cart = useStore<ShopState, Record<number, number>>(store => store.get('car
 Full code below:
 
 ```
-import { useStore } from 'spyn'
+import { useStore } from 'neutrix'
 import type { ShopState, Product } from './storeExample'
 
 export function Wishlist() {
@@ -500,11 +500,11 @@ export default App
 
 ## Summary
 
-In summary, we have demonstrated the key features and advantages of using Spyn as a state management solution:
+In summary, we have demonstrated the key features and advantages of using neutrix as a state management solution:
 
 ### Simple API
 
-Spyn offers a straightforward API with just `get` and `set` methods, as seen in cart operations:
+neutrix offers a straightforward API with just `get` and `set` methods, as seen in cart operations:
 
 ```
  const addToCart = (productId: number) => {
@@ -538,7 +538,7 @@ const cartTotal = store.computed('cartTotal', (state: ShopState) => {
 
 ### Built-in Persistence
 
-Just add `persist: true` and Spyn handles saving to localStorage:
+Just add `persist: true` and neutrix handles saving to localStorage:
 
 ```
 const store = createStore<ShopState>(initialState, {
@@ -551,6 +551,6 @@ const store = createStore<ShopState>(initialState, {
 
 Any component can access store data without prop drilling. The cart total is accessible in Header, CartDrawer, and ShopContent without passing props
 
-This e-commerce app effectively shows how Spyn makes state management simpler compared to solutions like Redux, which would require more boilerplate code for the same functionality.
+This e-commerce app effectively shows how neutrix makes state management simpler compared to solutions like Redux, which would require more boilerplate code for the same functionality.
 
 

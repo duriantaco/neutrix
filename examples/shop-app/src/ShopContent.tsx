@@ -1,4 +1,4 @@
-import { useStore } from 'spyn'
+import { useStore } from 'neutrix'
 import { addToCart, removeFromCart, cartTotal } from './storeExample'
 import type { ShopState, Product } from './storeExample'
 

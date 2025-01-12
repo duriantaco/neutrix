@@ -1,5 +1,5 @@
 // CartDrawer.tsx
-import { useStore } from 'spyn'
+import { useStore } from 'neutrix'
 import { cartTotal, toggleCart, removeFromCart } from './storeExample'
 import type { ShopState, Product } from './storeExample'
 

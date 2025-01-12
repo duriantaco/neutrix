@@ -1,8 +1,8 @@
-# Building a Todo App with Spyn
+# Building a Todo App with neutrix
 
 ## Introduction
 
-In this tutorial, we'll build a simple but functional Todo app that showcases Spyn's key features:
+In this tutorial, we'll build a simple but functional Todo app that showcases neutrix's key features:
 
 * Simple state management with `get/set`
 * Automatic store updates and re-rendering
@@ -22,7 +22,7 @@ We do have a full working example inside /examples so you can clone it into your
 ```
 npm create vite@latest todo-app -- --template react-ts
 cd todo-app
-npm install spyn react-router-dom
+npm install neutrix react-router-dom
 ```
 ## Tutorial
 
@@ -43,7 +43,7 @@ export interface TodoState extends State {
 }
 ```
 
-2. For managing todos, we create functions using Spyn's `store.get()` and `store.set()`. The addTodo function adds a new todo to the array.  ToggleTodo will update a todo's completed status. Spyn will automatically notify any components using todos data that they need to update.
+2. For managing todos, we create functions using neutrix's `store.get()` and `store.set()`. The addTodo function adds a new todo to the array.  ToggleTodo will update a todo's completed status. neutrix will automatically notify any components using todos data that they need to update.
 
 ```
 export const addTodo = (text: string) => {
@@ -69,8 +69,8 @@ export const toggleTodo = (id: number) => {
 Full code below: 
 ```
 // todoStore.ts
-import { createStore } from 'spyn'
-import type { State } from 'spyn'
+import { createStore } from 'neutrix'
+import type { State } from 'neutrix'
 
 export interface Todo {
   id: number
@@ -130,7 +130,7 @@ export const addTodo = (text: string) => {
 
 ### Form component
 
-The TodoForm component is a simple form for adding new todos. Here we can see how components interact with Spyn's store through direct function calls (as you seen earlier with addToDo). No need for dispatching actions or using context. Trying to keep it simple.
+The TodoForm component is a simple form for adding new todos. Here we can see how components interact with neutrix's store through direct function calls (as you seen earlier with addToDo). No need for dispatching actions or using context. Trying to keep it simple.
 
 ```
 import { useState } from 'react'
@@ -163,10 +163,10 @@ export function TodoForm() {
 
 ### Form List
 
-The TodoList component shows how Spyn handles computed values and automatic updates. When we use `useStore` with our filteredTodos computed value, the component automatically re-renders whenever the todos or filter changes.
+The TodoList component shows how neutrix handles computed values and automatic updates. When we use `useStore` with our filteredTodos computed value, the component automatically re-renders whenever the todos or filter changes.
 
 ```
-import { useStore } from 'spyn'
+import { useStore } from 'neutrix'
 import { filteredTodos, toggleTodo, setFilter } from './todoStore'
 import type { TodoState, Todo } from './todoStore'
 
@@ -198,3 +198,43 @@ export function TodoList() {
   )
 }
 ```
+
+### App
+
+import { StoreProvider } from 'neutrix'
+import { store } from './todoStore'
+import './App.css'
+
+function App() {
+  return (
+    <StoreProvider store={store}>
+      <div className="todo-app">
+        <h1>Todo App</h1>
+        <TodoForm />
+        <TodoList />
+      </div>
+    </StoreProvider>
+  )
+}
+
+## Summary
+
+### Simple store setup
+
+```
+const store = createStore<TodoState>(initialState, {
+  persist: true,  // auto persistence 
+  name: 'todo-store'
+})
+```
+
+### Direct store operations
+```
+const addTodo = (text: string) => {
+  const todos = store.get('todos')
+  store.set('todos', [...todos, newTodo])
+}
+```
+
+No need for reducers, action creators etc. 
+

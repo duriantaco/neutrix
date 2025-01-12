@@ -1,16 +1,16 @@
-# Getting Started with Spyn
+# Getting Started with neutrix
 
 ## Installation
 
-Add Spyn to your project:
+Add neutrix to your project:
 
 ```bash
-npm install spyn
+npm install neutrix
 ```
 
 ## Core Features Overview
 
-Spyn is a state management library providing the following core capabilities:
+neutrix is a state management library providing the following core capabilities:
 
 ### Store Management
 
@@ -39,7 +39,7 @@ Spyn is a state management library providing the following core capabilities:
 
 ### Creating a Store
 
-The store is the central piece of Spyn. It holds your application state and provides methods to interact with it. Create a store using createStore:
+The store is the central piece of neutrix. It holds your application state and provides methods to interact with it. Create a store using createStore:
 
 ```typescript
 const store = createStore(initialState, {
@@ -83,7 +83,7 @@ connectStore({
 
 ### State Operations
 
-Spyn provides several ways to interact with state:
+neutrix provides several ways to interact with state:
 
 Basic Operations:
 
@@ -180,14 +180,14 @@ store.use(middleware)
 
 #### Store provider
 
-Spyn provides React hooks for easy integration:
+neutrix provides React hooks for easy integration:
 
 * Wrap your app with `StoreProvider`
 * Provides store context to all components
 * Handles subscriptions automatically
 
 ```typescript
-import { useStore } from 'spyn/react'
+import { useStore } from 'neutrix/react'
 
 function Counter() {
   const count = useStore(store, 'count')
@@ -220,7 +220,7 @@ const { execute, loading, error } = useAction(
 
 ### Performance Features
 
-Spyn includes several performance optimizations:
+neutrix includes several performance optimizations:
 
 #### LRU Cache System
 

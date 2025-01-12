@@ -91,16 +91,20 @@ describe('createStore', () => {
     });
 
     it('should persist state if options.persist is true', () => {
-        const persistStore = createStore<TestState>(
-            initialState,
-            { persist: true, name: 'test-store' }
-        );
-        
-        persistStore.set('count', 1);
-        const storedValue = mockStorage['test-store'];
-        expect(storedValue).toBeTruthy();
-        const savedState = JSON.parse(storedValue);
-        expect(savedState.count).toBe(1);
+      const persistStore = createStore<TestState>(
+        initialState,
+        { persist: true, name: 'test-store' }
+      );
+      
+      persistStore.set('count', 1);
+      
+      expect(window.localStorage.setItem).toHaveBeenCalled();
+      const [key, value] = (window.localStorage.setItem as any).mock.lastCall;
+      
+      expect(key).toBe('test-store');
+      expect(JSON.parse(value)).toEqual(expect.objectContaining({
+        count: 1
+      }));
     });
 
     it('should load persisted state if options.persist is true', () => {

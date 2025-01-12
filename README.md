@@ -1,17 +1,17 @@
-# 🌀 Spyn
+# 🌀 neutrix
 
 A powerful and hopefully simple state management library for React.
 
 ## Motivation
 
 ### Why Another State Manager?
-Most state managers claim to solve Redux's problems but end up doing the same things as Redux. Spyn takes a fundamentally different approach:
+Most state managers claim to solve Redux's problems but end up doing the same things as Redux. neutrix takes a fundamentally different approach:
 
 ### State management shouldn't be complicated .
 
-While Redux offers great dev tools and predictable updates, and MobX provides elegant reactivity, they both come with significant learning curves and boilerplate (Redux has tons of it and it's extremely frustrating to use- or maybe I'm just dumb). We built Spyn because we believe you shouldn't need to learn actions, reducers, observables, or complex patterns just to manage your app's state. There's enough s**t to do, and am trying not to make it even more difficult than it has to be.
+While Redux offers great dev tools and predictable updates, and MobX provides elegant reactivity, they both come with significant learning curves and boilerplate (Redux has tons of it and it's extremely frustrating to use- or maybe I'm just dumb). We built neutrix because we believe you shouldn't need to learn actions, reducers, observables, or complex patterns just to manage your app's state. There's enough s**t to do, and am trying not to make it even more difficult than it has to be.
 
-## Why Spyn?
+## Why neutrix?
 
 - 📦 **Tiny**
 - 🎯 **Dead simple API** - just get() and set()
@@ -37,7 +37,7 @@ const selectFullName = createSelector(
   (first, last) => `${first} ${last}`
 );
 
-// Spyn: Automatic tracking
+// neutrix: Automatic tracking
 const fullName = store.computed('fullName', state => {
   return `${state.user.firstName} ${state.user.lastName}`;
 });
@@ -67,7 +67,7 @@ This provides optimal performance while preventing memory leaks.
 
 ### 4. Dependency tracking
 
-Spyn uses ES6 Proxies to automatically track dependencies in computed values:
+neutrix uses ES6 Proxies to automatically track dependencies in computed values:
 
 ```
 const proxy = new Proxy(state, {
@@ -80,9 +80,9 @@ const proxy = new Proxy(state, {
 
 ## Installation
 
-`npm install spyn`
+`npm install neutrix`
 # or
-`yarn add spyn`
+`yarn add neutrix`
 
 ## Quick Start
 
@@ -211,7 +211,7 @@ function FeatureGate({ feature, children }) {
 }
 ```
 
-## Why use Spyn?
+## Why use neutrix?
 
 ### vs Redux
 - No actions/reducers boilerplate
@@ -239,7 +239,7 @@ function FeatureGate({ feature, children }) {
 
 ## Under The Hood
 
-Spyn is built on three key principles:
+neutrix is built on three key principles:
 
 1. **React Context + Proxy Magic**: We are using React Context for the provider system. We further enhance it with ES6 Proxies for an easier experience.
 
@@ -251,7 +251,7 @@ Spyn is built on three key principles:
 
 3. **Developer Experience**: We provide Redux DevTools integration, TypeScript support, and a simple mental model while handling complex state management patterns under the hood.
 
-4. **Everything in Spyn is built on these fundamentals** :
+4. **Everything in neutrix is built on these fundamentals** :
 
 * Zero-config setup
 * Automatic performance optimizations

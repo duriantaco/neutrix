@@ -1,5 +1,5 @@
 // Header.tsx
-import { useStore } from 'spyn'
+import { useStore } from 'neutrix'
 import { cartTotal, toggleCart } from './storeExample'
 import type { ShopState } from './storeExample'
 

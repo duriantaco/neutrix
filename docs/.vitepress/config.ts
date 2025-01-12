@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: "Spyn",
+  title: "neutrix",
   description: "An easy to use (hopefully) state management library for React",
   themeConfig: {
     nav: [
@@ -54,7 +54,7 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/duriantaco/spyn' }
+      { icon: 'github', link: 'https://github.com/duriantaco/neutrix' }
     ]
   }
 })

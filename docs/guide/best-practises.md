@@ -4,7 +4,7 @@
 
 ### Structure Your State Thoughtfully
 
-Your store's state structure is crucial for maintainability and performance. Looking at how Spyn implements paths and updates, here's how to organize your state effectively:
+Your store's state structure is crucial for maintainability and performance. Looking at how neutrix implements paths and updates, here's how to organize your state effectively:
 
 ```typescript
 // ❌ Avoid deeply nested state
@@ -32,7 +32,7 @@ const store = createStore({
 
 ### Use Computed Properties for Derived State
 
-Instead of manually recalculating values or storing derived data, use Spyn's built-in computed values system:
+Instead of manually recalculating values or storing derived data, use neutrix's built-in computed values system:
 
 ```typescript
 // ❌ Avoid storing derived data
@@ -152,7 +152,7 @@ const updateUser = store.action(
 
 ### Use Middleware for Cross-Cutting Concerns
 
-Spyn's middleware system is powerful but should be used carefully:
+neutrix's middleware system is powerful but should be used carefully:
 
 ```typescript
 // ❌ Avoid putting business logic in middleware

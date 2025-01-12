@@ -1,10 +1,10 @@
-# Spyn
+# neutrix
 
-Spyn is an easy to use (hopefully) state management library for React applications. It is a state management library for React that simplifies complex state updates and computations. It provides a centralized store with computed values that automatically track dependencies, making it easier to maintain consistent application state.
+neutrix is an easy to use (hopefully) state management library for React applications. It is a state management library for React that simplifies complex state updates and computations. It provides a centralized store with computed values that automatically track dependencies, making it easier to maintain consistent application state.
 
-## Why use Spyn? 
+## Why use neutrix? 
 
-Managing state in React applications can become complex, especially when dealing with derived data, async updates, and state persistence. Spyn solves these challenges by providing:
+Managing state in React applications can become complex, especially when dealing with derived data, async updates, and state persistence. neutrix solves these challenges by providing:
 
 * A centralized store with path-based state access
 * Computed values that track their own dependencies and update automatically
@@ -14,7 +14,7 @@ Managing state in React applications can become complex, especially when dealing
 
 ## Quick Start
 
-`npm install spyn`
+`npm install neutrix`
 
 ## Core Features 
 

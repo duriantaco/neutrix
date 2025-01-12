@@ -5,7 +5,7 @@
 Actions provide a way to handle complex state changes and async operations. While simple set operations may work for basic state updates, real world apps often need to coordinate multiple changes, handle API calls, or process data before updating state. Actions solve this by providing a structured way to handle these complex operations.
 
 ## Why Use Actions?
-Actions are a fundamental part of Spyn that help you manage complex state changes in a clean and maintainable way. They provide several key benefits:
+Actions are a fundamental part of neutrix that help you manage complex state changes in a clean and maintainable way. They provide several key benefits:
 
 1. Cleaner - Actions make your code more organized and easier to maintain
 

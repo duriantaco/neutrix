@@ -1,8 +1,8 @@
-# Redux vs Spyn: Boilerplate Comparison
+# Redux vs neutrix: Boilerplate Comparison
 
 ## Real-world User Management Example
 
-Let's implement a user auth system with loading states, error handling, and profile updates in redux first then spyn:
+Let's implement a user auth system with loading states, error handling, and profile updates in redux first then neutrix:
 
 ### Redux Implementation
 
@@ -83,7 +83,7 @@ const selectError = state => state.user.error
 const selectUpdateLoading = state => state.user.updateLoading
 ```
 
-### Spyn Implementation
+### neutrix Implementation
 ```
 const store = createStore({
   user: null,
@@ -132,12 +132,12 @@ Redux is cumbersome and difficult to use. It consists of the following:
 
 Redux requires a lot more boilerplate code. 
 
-Spyn offers a more streamlined approach:
+neutrix offers a more streamlined approach:
 
 * Direct store creation with initial state
 * Actions that can directly modify the store
 * Built-in async handling without additional middleware
-* Spyn reduces boilerplate by allowing direct state mutations through `store.set()` and handling loading/error states in a more straightforward way using try/catch/finally blocks. 
+* neutrix reduces boilerplate by allowing direct state mutations through `store.set()` and handling loading/error states in a more straightforward way using try/catch/finally blocks. 
 
 ## Simple Counter
 
@@ -184,7 +184,7 @@ function Counter() {
 }
 ```
 
-### Spyn Implementation
+### neutrix Implementation
 
 ```
 const store = createStore({ count: 0 })
@@ -204,15 +204,15 @@ function Counter() {
 ```
 
 
-| Feature | Redux | Spyn | Winner |
+| Feature | Redux | neutrix | Winner |
 |---------|--------|------|---------|
-| **Setup Code** | Requires store setup, middleware configuration, root reducer, dev tools setup | Single createStore call with options | Spyn |
-| **State Updates** | Action creators + reducer + dispatch | Direct store.set() calls | Spyn |
-| **Async Operations** | Requires middleware (thunk/saga), multiple action types, action creators | Built-in action system | Spyn |
-| **TypeScript Support** | Requires additional type definitions and utilities | Built-in TypeScript support | Spyn |
+| **Setup Code** | Requires store setup, middleware configuration, root reducer, dev tools setup | Single createStore call with options | neutrix |
+| **State Updates** | Action creators + reducer + dispatch | Direct store.set() calls | neutrix |
+| **Async Operations** | Requires middleware (thunk/saga), multiple action types, action creators | Built-in action system | neutrix |
+| **TypeScript Support** | Requires additional type definitions and utilities | Built-in TypeScript support | neutrix |
 | **DevTools** | Built-in extensive support | Basic support through options | Redux |
 | **Middleware** | Rich ecosystem, highly customizable | Basic middleware system | Redux |
-| **State Persistence** | Requires additional packages (redux-persist) | Built-in persistence support | Spyn |
-| **Computed Values** | Requires reselect or manual memoization | Built-in computed system | Spyn |
-| **Learning Curve** | Steep (actions, reducers, middleware concepts) | Gentle (simple get/set API) | Spyn |
+| **State Persistence** | Requires additional packages (redux-persist) | Built-in persistence support | neutrix |
+| **Computed Values** | Requires reselect or manual memoization | Built-in computed system | neutrix |
+| **Learning Curve** | Steep (actions, reducers, middleware concepts) | Gentle (simple get/set API) | neutrix |
 | **Ecosystem** | Very large, mature ecosystem | Newer, smaller ecosystem | Redux |

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Batch updates in Spyn allow you to perform multiple state changes in a single operation. This is crucial for performance and state consistency when you need to update several pieces of state at once. Instead of triggering multiple separate updates (and potentially multiple re-renders), batching combines them into a single atomic operation.
+Batch updates in neutrix allow you to perform multiple state changes in a single operation. This is crucial for performance and state consistency when you need to update several pieces of state at once. Instead of triggering multiple separate updates (and potentially multiple re-renders), batching combines them into a single atomic operation.
 
 # Basic Usage
 
@@ -35,10 +35,10 @@ When you use batch updates like this, all changes are applied together. Your com
 
 ## State Validation
 
-Spyn ensures that your batch updates maintain state validity just like individual updates. If any update in the batch would result in an invalid state, the entire batch is rejected.
+neutrix ensures that your batch updates maintain state validity just like individual updates. If any update in the batch would result in an invalid state, the entire batch is rejected.
 
 ## Handling Dependencies
-When using batch updates with computed values or subscriptions, Spyn manages the dependency tracking efficiently. Affected computed values are only recalculated once after the entire batch completes.
+When using batch updates with computed values or subscriptions, neutrix manages the dependency tracking efficiently. Affected computed values are only recalculated once after the entire batch completes.
 
 ```typescript
 store.batch([

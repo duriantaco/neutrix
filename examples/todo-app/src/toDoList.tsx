@@ -1,5 +1,5 @@
 // toDoList.tsx
-import { useStore } from 'spyn'
+import { useStore } from 'neutrix'
 import { filteredTodos, toggleTodo, setFilter } from './toDoStore'
 import type { TodoState, Todo } from './toDoStore'
 

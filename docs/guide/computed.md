@@ -2,7 +2,7 @@
 
 ## Overview
 
-Computed values are one of Spyn's core features. Think of computed values like Excel formulas - values are automatically recalculate when any of their input cells change. In Spyn, it works kind of the same way. When any piece of state that they depend on changes, they automatically update their results.
+Computed values are one of neutrix's core features. Think of computed values like Excel formulas - values are automatically recalculate when any of their input cells change. In neutrix, it works kind of the same way. When any piece of state that they depend on changes, they automatically update their results.
 
 This is good for maintaining derived states that needs to stay in sync with your core data. Instead of manually updating calculated values every time related data changes, computed values handle this automatically. They let you create derived state that automatically updates when its dependencies change. 
 
@@ -15,7 +15,7 @@ Here's a simple example:
 ```typescript
 const store = createStore({
   todos: [
-    { id: 1, text: 'Learn Spyn', completed: false },
+    { id: 1, text: 'Learn neutrix', completed: false },
     { id: 2, text: 'Write docs', completed: true }
   ]
 })
@@ -40,7 +40,7 @@ function TodoList() {
 
 ## Dependency Tracking
 
-One of the features of computed values is automatic dependency tracking. Unlike other state management solutions where you need to explicitly specify dependencies, Spyn tracks them automatically by monitoring which parts of the state your computation actually uses.
+One of the features of computed values is automatic dependency tracking. Unlike other state management solutions where you need to explicitly specify dependencies, neutrix tracks them automatically by monitoring which parts of the state your computation actually uses.
 
 For example: 
 
@@ -56,7 +56,7 @@ const userStatus = store.computed(
 )
 ```
 
-In the above example, Spyn automatically detects that this computation depends on `user.isLoggedIn` and `user.lastActive`. When either of these values changes, the status will be recalculated. You don't need to maintain this list of dependencies manually. 
+In the above example, neutrix automatically detects that this computation depends on `user.isLoggedIn` and `user.lastActive`. When either of these values changes, the status will be recalculated. You don't need to maintain this list of dependencies manually. 
 
 ## Chaining Computed Values
 

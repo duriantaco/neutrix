@@ -1,7 +1,7 @@
 // App.tsx
 import { TodoList } from './TodoList'
 import { TodoForm } from './TodoForm'
-import { StoreProvider } from 'spyn'
+import { StoreProvider } from 'neutrix'
 import { store } from './toDoStore'
 import './App.css'
 

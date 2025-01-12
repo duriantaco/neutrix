@@ -15,11 +15,12 @@ export default defineConfig({
     }) as any
   ],
   build: {
+    copyPublicDir: false,
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'spyn',
+      name: 'neutrix',
       formats: ['es', 'umd'],
-      fileName: (format) => `spyn.${format}.js`
+      fileName: (format) => `neutrix.${format}.js`
     },
     rollupOptions: {
       external: ['react', 'react-dom'],

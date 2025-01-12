@@ -1,19 +1,20 @@
 {
-  "name": "spyn",
+  "name": "neutrix",
   "version": "0.0.0",
   "type": "module",
-  "main": "./dist/spyn.umd.js",
-  "module": "./dist/spyn.es.js",
+  "main": "./dist/neutrix.umd.js",
+  "module": "./dist/neutrix.es.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/spyn.es.js",
-      "require": "./dist/spyn.umd.js"
+      "import": "./dist/neutrix.es.js",
+      "require": "./dist/neutrix.umd.js"
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/vite.svg"
   ],
   "scripts": {
     "dev": "vite",
@@ -27,11 +28,11 @@
     "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
-    "@types/react": "^18.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@types/react": "^18.2.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^14.3.1",

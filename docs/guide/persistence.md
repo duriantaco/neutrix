@@ -2,7 +2,7 @@
 
 ## Overview
 
-Persistence in Spyn allows your store's state to survive page reloads and browser restarts. By enabling persistence, your application's state will automatically be saved to localStorage and restored when the application restarts. This is useful for maintaining user preferences, session data, or some work-in-progress content.
+Persistence in neutrix allows your store's state to survive page reloads and browser restarts. By enabling persistence, your application's state will automatically be saved to localStorage and restored when the application restarts. This is useful for maintaining user preferences, session data, or some work-in-progress content.
 
 ## Basic Usage
 
@@ -67,7 +67,7 @@ This selective persistence approach is valuable when dealing with larger applica
 
 ## Migration Support 
 
-One of the biggest challenges with persisted state is handling changes to your state structure over time. Spyn includes built-in migration support to help manage these transitions smoothly.
+One of the biggest challenges with persisted state is handling changes to your state structure over time. neutrix includes built-in migration support to help manage these transitions smoothly.
 
 ```typescript
 const store = createStore({
@@ -87,7 +87,7 @@ const store = createStore({
 })
 ```
 
-When you update your application and need to change how your state is structured, migrations prevent your users from losing their data. Spyn keeps track of the state version in storage and automatically runs your migration function when it detects an outdated state version.
+When you update your application and need to change how your state is structured, migrations prevent your users from losing their data. neutrix keeps track of the state version in storage and automatically runs your migration function when it detects an outdated state version.
 
 For example, if you need to update your settings structure, the migration system ensures existing users don't lose their preferences while allowing you to update the data format.
 

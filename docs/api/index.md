@@ -1,7 +1,7 @@
 # API Reference
 
 ## Store Creation
-The `createStore` function is the entry point for creating a new Spyn store. It sets up the state container with all the necessary features like state tracking, computed values, and persistence.
+The `createStore` function is the entry point for creating a new neutrix store. It sets up the state container with all the necessary features like state tracking, computed values, and persistence.
 
 ## createStore
 

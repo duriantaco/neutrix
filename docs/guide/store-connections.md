@@ -2,7 +2,7 @@
 
 ## Overview
 
-Store connections in Spyn provide a way to sync multiple stores together. This is useful when you need to coordinate state changes between different parts of your application, or when you want to keep multiple stores in sync with specific rules.
+Store connections in neutrix provide a way to sync multiple stores together. This is useful when you need to coordinate state changes between different parts of your application, or when you want to keep multiple stores in sync with specific rules.
 
 ## Basic Usage
 
