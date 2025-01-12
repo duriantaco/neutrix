@@ -2,6 +2,9 @@
 
 A powerful and hopefully simple state management library for React.
 
+## Docs!
+Docs can be found here: [https://duriantaco.github.io/neutrix](https://duriantaco.github.io/neutrix)
+
 ## Motivation
 
 ### Why Another State Manager?

@@ -309,5 +309,4 @@ interface Store<T extends State> {
 ### Next Steps
 
 - Check out the [Tutorials](/tutorials/) section for more usage patterns
-- Learn about [Advanced Features](/guide/advanced-features)
 - Read the [API Reference](/api/)

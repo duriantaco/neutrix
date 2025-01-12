@@ -22,5 +22,5 @@ Refer to the [Guide](/guide/)
 
 ### Want to learn more? Check out:
 
-* API Reference [API](/api)
-* Tutorials [Tutorials](/tutorials)
+* API Reference [API](/api/)
+* Tutorials [Tutorials](/tutorials/)
