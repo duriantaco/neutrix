@@ -21,6 +21,11 @@ While Redux offers great dev tools and predictable updates, and MobX provides el
 - 🎨 **TypeScript** ready
 - 0️⃣ Minimal configuration
 
+## Docs!
+Docs can be found here 
+
+<!-- Insert Link -->
+
 ## Key features
 
 ### 1. Automatic Dependency Tracking
@@ -206,57 +211,6 @@ function FeatureGate({ feature, children }) {
 }
 ```
 
-## Core Concepts
-
-###  Direct state access
-
-```
-// Get values
-const name = store.get('user.name');
-const theme = store.get('preferences.theme');
-
-// Set values
-store.set('user.name', 'John');
-store.set('preferences.theme', 'dark');
-```
-
-### Atomic updates
-
-```
-Batch updates:
-store.batch([
-  ['user', newUser],
-  ['theme', 'dark'],
-  ['lastUpdated', Date.now()]
-]);
-```
-
-### Store connections
-
-```
-// Automatically sync stores
-connectStores([{
-  source: userStore,
-  target: preferencesStore,
-  when: store => store.get('user.loggedIn'),
-  then: target => target.set('theme', 'user-preferred-theme')
-}]);
-```
-
-### Performance optimizations
-
-Use selectors to prevent unnecessary rerenders:
-```
-// Only rerenders when user changes
-const user = useStore(store => store.get('user'));
-
-// Select multiple values
-const { user, theme } = useStore(store => ({
-  user: store.get('user'),
-  theme: store.get('theme')
-}));
-```
-
 ## Why use Spyn?
 
 ### vs Redux
@@ -304,14 +258,6 @@ Spyn is built on three key principles:
 * Type safety throughout
 * Predictable updates
 * Better dev experience (or hopefully?)
-
-## Best Practices
-
-1. Keep state flat when possible
-2. Use batch() for multiple updates
-3. Use selectors for performance
-4. Split state logically
-5. Keep components focused
 
 ## What this is not
 

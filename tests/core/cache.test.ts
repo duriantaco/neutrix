@@ -91,7 +91,6 @@ describe('Advanced Cache Behavior', () => {
         cache.set('b', obj2);
         cache.set('c', obj3);
         
-        // Check if obj1 was properly evicted
         expect(cache.get('a')).toBeUndefined();
         expect(cache.get('b')).toEqual({ data: 'test2' });
         expect(cache.get('c')).toEqual({ data: 'test3' });
@@ -107,7 +106,6 @@ describe('Advanced Cache Behavior', () => {
             }
         }
         
-        // Should only have the last 3 valid items
         let size = 0;
         for (let i = 0; i < 10; i++) {
             if (cache.has(i)) size++;
