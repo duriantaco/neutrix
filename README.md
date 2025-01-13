@@ -33,7 +33,7 @@ Docs can be found here
 
 ### 1. Automatic Dependency Tracking
 
-```
+```typescript
 // Other libraries: Manual dependency declaration
 const selectFullName = createSelector(
   [selectFirstName, selectLastName],
@@ -47,7 +47,7 @@ const fullName = store.computed('fullName', state => {
 ```
 
 ### 2. Bidirectional middleware
-```
+```typescript
 store.use({
   onSet: (path, value, prevValue) => {
     console.log(`Setting ${path}: ${prevValue} -> ${value}`);
@@ -72,7 +72,7 @@ This provides optimal performance while preventing memory leaks.
 
 neutrix uses ES6 Proxies to automatically track dependencies in computed values:
 
-```
+```typescript
 const proxy = new Proxy(state, {
   get(target, prop: string) {
     trackDependency(prop, path);
@@ -91,7 +91,7 @@ const proxy = new Proxy(state, {
 
 ## Simple Example: 
 
-```
+```typescript
 // 1. Create stores
 const userStore = createStore({
   user: null,
@@ -129,7 +129,7 @@ function Profile() {
 
 ## Real world example:
 
-```
+```typescript
 // userStore.ts - All the user's data
 const userStore = createStore({
   profile: null,
