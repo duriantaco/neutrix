@@ -8,7 +8,8 @@ export default defineConfig({
     nav: [
       { text: 'Guide', link: '/guide/' },
       { text: 'Tutorials', link: '/tutorials/' },
-      { text: 'API', link: '/api/' }
+      { text: 'API', link: '/api/' },
+      { text: 'Comparison', link: '/comparison/' }
     ],
 
     sidebar: {
@@ -19,11 +20,12 @@ export default defineConfig({
             { text: 'Getting Started', link: '/guide/' },
             { text: 'Action', link: '/guide/action' },
             { text: 'Batching', link: '/guide/batching' },
-            { text: 'Best Practices', link: '/guide/best-practises' },
             { text: 'Computed Values', link: '/guide/computed' },
             { text: 'Middleware', link: '/guide/middleware' },
             { text: 'Persistence', link: '/guide/persistence' },
-            { text: 'Store Connections', link: '/guide/store-connections' }
+            { text: 'Store Connections', link: '/guide/store-connections' },
+            { text: 'Best Practices', link: '/guide/best-practises' },
+
           ]
         }
       ],

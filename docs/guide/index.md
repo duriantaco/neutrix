@@ -8,9 +8,28 @@ Add neutrix to your project:
 npm install neutrix
 ```
 
+## Setup for Typescript configuration
+
+To use neutrix with TypeScript, ensure your tsconfig.json has the following configurations:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true
+  }
+}
+```
+
 ## Core Features Overview
 
 neutrix is a state management library providing the following core capabilities:
+
+<img src="/images/diagram.png" alt="Core Neutrix Flow" style="margin: 20px 0" />
 
 ### Store Management
 

@@ -10,6 +10,10 @@ In this tutorial, we'll build a complete e-commerce application using neutrix fo
 * Persist user's cart data
 * Build reusable React components
 
+## CodeSandBox
+
+You can see the result in this [CodeSandbox demo](https://codesandbox.io/p/sandbox/cartapp-mvgx9g). Note that your environment may differ slightly from the tutorial below.
+
 ## Prerequisites
 
 * Basic knowledge of React and TypeScript

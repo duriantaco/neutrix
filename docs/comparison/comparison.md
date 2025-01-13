@@ -203,16 +203,15 @@ function Counter() {
 }
 ```
 
-
-| Feature | Redux | neutrix | Winner |
-|---------|--------|------|---------|
-| **Setup Code** | Requires store setup, middleware configuration, root reducer, dev tools setup | Single createStore call with options | neutrix |
-| **State Updates** | Action creators + reducer + dispatch | Direct store.set() calls | neutrix |
-| **Async Operations** | Requires middleware (thunk/saga), multiple action types, action creators | Built-in action system | neutrix |
-| **TypeScript Support** | Requires additional type definitions and utilities | Built-in TypeScript support | neutrix |
-| **DevTools** | Built-in extensive support | Basic support through options | Redux |
-| **Middleware** | Rich ecosystem, highly customizable | Basic middleware system | Redux |
-| **State Persistence** | Requires additional packages (redux-persist) | Built-in persistence support | neutrix |
-| **Computed Values** | Requires reselect or manual memoization | Built-in computed system | neutrix |
-| **Learning Curve** | Steep (actions, reducers, middleware concepts) | Gentle (simple get/set API) | neutrix |
-| **Ecosystem** | Very large, mature ecosystem | Newer, smaller ecosystem | Redux |
+| Feature | neutrix | Redux | Redux Toolkit | MobX |
+|---------|---------|--------|----------------|-------|
+| **Setup Code** | Single createStore call with options | Requires store setup, middleware configuration, root reducer | Simplified with configureStore | Minimal setup with makeObservable/makeAutoObservable |
+| **State Updates** | Direct store.set() with path access | Action creators + reducer + dispatch | CreateSlice with reducers | Direct mutations with observable state |
+| **Async Operations** | Built-in action system with suspense support | Requires thunk/saga middleware | Built-in thunk and createAsyncThunk | Async actions with runInAction |
+| **TypeScript Support** | Native TypeScript support with path inference | Manual type definitions needed | Improved TS support with built-in types | Decorator-based type system |
+| **DevTools Integration** | Redux DevTools support | Extensive Redux DevTools support | Same Redux DevTools support | MobX DevTools and Redux DevTools |
+| **Middleware System** | Simple middleware with get/set hooks | Highly flexible middleware chain | Pre-configured middleware, extensible | Limited middleware support |
+| **State Persistence** | Built-in persistence options | Requires redux-persist | Requires redux-persist | Requires manual implementation |
+| **Computed Values** | Built-in computed system with LRU cache | Requires reselect | Requires reselect | Built-in computed values |
+| **Learning Curve** | Simple get/set API with familiar patterns | Many concepts (actions, reducers, middleware) | Simplified Redux concepts | Observable concepts, reactions, actions |
+| **Ecosystem** | Newer, smaller ecosystem | Large, mature ecosystem | Same as Redux | Medium-sized ecosystem |
