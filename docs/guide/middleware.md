@@ -70,7 +70,6 @@ const devMiddleware: Middleware = {
   }
 }
 
-// Add middleware and store cleanup function
 const cleanup = store.use(devMiddleware)
 
 cleanup()

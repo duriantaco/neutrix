@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
+  base: '/neutrix/',
   title: "neutrix",
   description: "An easy to use (hopefully) state management library for React",
   themeConfig: {

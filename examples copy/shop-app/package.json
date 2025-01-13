@@ -1,5 +1,5 @@
 {
-  "name": "todo-app",
+  "name": "shop-app",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -12,7 +12,8 @@
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "neutrix": "file:../.." 
+    "react-router-dom": "^7.1.1",
+    "neutrix": "^0.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

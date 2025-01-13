@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "jsx": "react-jsx",
+    "declaration": true,
+    "declarationDir": "./dist",
+    "outDir": "./dist",
+    "emitDeclarationOnly": true,
+    "allowJs": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "types": ["vite/client", "vitest"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "examples", "**/*.test.ts", "**/*.test.tsx"]
+}
