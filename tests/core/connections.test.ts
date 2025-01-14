@@ -1,14 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { connectStores, connectStore } from '../../src/core/connections';
 import { StoreConnection, State } from '../../src/core/types';
+import { createStore } from '../../src/core/store';
 
 vi.mock('../../src/core/connections', () => ({
     connectStores: vi.fn((connections) => {
         const unsubscribes: Array<() => void> = [];
         connections.forEach(({ source, target, when, then, immediate }) => {
             const handler = () => {
-                if (when(source)) {
-                    then(target);
+                try {
+                    if (when(source)) {
+                        then(target);
+                    }
+                } catch (error) {
+                    console.error('Connection error:', error);
                 }
             };
             const unsubscribe = source.subscribe(handler);

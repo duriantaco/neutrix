@@ -1,7 +1,14 @@
 // src/index.ts
 
-export { createStore } from './core/store';
+export { createStore, createStoreForSSR } from './core/store';
 export { connectStores, connectStore } from './core/connections';
+
+export { NeutrixProvider } from './react/NeutrixProvider';
+export {
+  useNeutrixSelector,
+  useNeutrixComputed,
+  useNeutrixAction
+} from './react/hooks';
 
 export type {
   Store,
@@ -18,10 +25,6 @@ export type {
   Subscriber
 } from './core/types';
 
-export {
-  StoreProvider,
-  useStoreContext,
-  useStore,
-  useComputed,
-  useAction
-} from './react';
+export type {
+  NeutrixProviderProps,
+} from './react/NeutrixProvider';

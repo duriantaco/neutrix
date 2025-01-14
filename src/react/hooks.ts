@@ -1,79 +1,82 @@
-// src/react/hooks.ts
-import { useContext, useEffect, useState, useCallback, useRef } from 'react';
-import { Store, State } from '../core/types';
-import { StoreContext } from './provider';
+import { useContext, useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { NeutrixContext, getStoreFromContext } from './context';
+import type { Store, State } from '../core/types';
 
-export function useStore<S extends State, R>(selector: (store: Store<S>) => R): R {
-    const store = useContext(StoreContext) as Store<S>;
-    const selectorRef = useRef(selector);
-    selectorRef.current = selector;
+export function useNeutrixSelector<S extends State, R>(
+  selector: (store: Store<S>) => R
+): R {
+  const contextValue = useContext(NeutrixContext);
+  const store = getStoreFromContext(contextValue) as unknown as Store<S>;
   
-    const [value, setValue] = useState(() => selector(store));
+  const selectorRef = useRef(selector);
   
-    useEffect(() => {
-      setValue(selectorRef.current(store));
+  const [value, setValue] = useState(() => selector(store));
   
-      const unsubscribe = store.subscribe(() => {
-        setValue(selectorRef.current(store));
-      });
-  
-      return unsubscribe;
-    }, [store]);
-  
-    return value;
+  useEffect(() => {
+    const unsubscribe = store.subscribe(() => {
+      const newValue = selectorRef.current(store);
+      setValue(newValue);
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [store]);
+
+  return value;
 }
-  
-export function useComputed<S extends State, R>(compute: (store: Store<S>) => R): R {
-    const store = useContext(StoreContext) as Store<S>;
-    const computeRef = useRef(compute);
-    computeRef.current = compute;
-  
-    const [value, setValue] = useState(() => compute(store));
-  
-    useEffect(() => {
-      setValue(computeRef.current(store));
-  
-      const unsubscribe = store.subscribe(() => {
-        setValue(computeRef.current(store));
-      });
-  
-      return unsubscribe;
-    }, [store]);
-  
-    return value;
-  }
 
-interface ActionState<E = Error> {
+export function useNeutrixComputed<S extends State, R>(
+  computeFn: (store: Store<S>) => R
+): R {
+  const contextValue = useContext(NeutrixContext);
+  const store = getStoreFromContext(contextValue) as unknown as Store<S>;
+
+  const memoizedComputeFn = useCallback(computeFn, [computeFn]);
+  
+  const [value, setValue] = useState(() => memoizedComputeFn(store));
+  
+  useEffect(() => {
+    const unsubscribe = store.subscribe(() => {
+      const newValue = memoizedComputeFn(store);
+      setValue(newValue);
+    });
+    return unsubscribe;
+  }, [store, memoizedComputeFn]);
+
+  return value;
+}
+
+interface ActionState {
   loading: boolean;
-  error: E | null;
+  error: Error | null;
 }
 
-export function useAction<S extends State, Args extends any[], R>(
+export function useNeutrixAction<S extends State, Args extends any[], R>(
   action: (store: Store<S>, ...args: Args) => Promise<R>
 ) {
-  const store = useContext(StoreContext) as Store<S>;
-  const actionRef = useRef(action);
-  actionRef.current = action;
-
+  const contextValue = useContext(NeutrixContext);
+  const store = getStoreFromContext(contextValue) as unknown as Store<S>;
+  
   const [state, setState] = useState<ActionState>({
     loading: false,
-    error: null,
+    error: null
   });
 
   const execute = useCallback(
     async (...args: Args) => {
       setState({ loading: true, error: null });
+      
       try {
-        const result = await actionRef.current(store, ...args);
+        const result = await action(store, ...args);
         setState({ loading: false, error: null });
         return result;
-      } catch (error) {
-        const typedError = error as Error;
-        setState({ loading: false, error: typedError });
-        throw typedError;
+      } catch (err) {
+        setState({ loading: false, error: err as Error });
+        throw err;
       }
     },
-    [store]
+    [store, action]
   );
 
   return {

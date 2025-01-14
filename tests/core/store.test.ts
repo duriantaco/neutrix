@@ -3,9 +3,115 @@ import { createStore } from '../../src/core/store';
 import { State, StoreOptions } from '../../src/core/types';
 
 interface TestState extends State {
-    count: number;
+  count: number;
+  user?: {
     name: string;
+    settings?: {
+      theme: string;
+    }
+  };
 }
+
+describe('Store Error Handling and Edge Cases', () => {
+  let store: ReturnType<typeof createStore<TestState>>;
+  
+  beforeEach(() => {
+    store = createStore<TestState>({ count: 0 });
+  });
+
+  it('should handle undefined paths gracefully', () => {
+    expect(() => store.get('nonexistent.path')).not.toThrow();
+    expect(store.get('nonexistent.path')).toBeUndefined();
+  });
+
+  it('should prevent circular references in state', () => {
+    const circularObj: any = { foo: {} };
+    circularObj.foo.bar = circularObj;
+
+    expect(() => store.set('circular', circularObj)).toThrow();
+  });
+
+  it('should handle concurrent set operations safely', async () => {
+    const operations = Array(100).fill(0).map((_, i) => 
+      store.set('count', i)
+    );
+    
+    await Promise.all(operations);
+    const finalCount = store.get('count');
+    expect(typeof finalCount).toBe('number');
+    expect(finalCount).toBeLessThanOrEqual(99);
+    expect(finalCount).toBeGreaterThanOrEqual(0);
+  });
+
+  it('should validate nested state updates', () => {
+    const validateStore = createStore<TestState>(
+      { count: 0 },
+      {
+        validate: (state) => {
+          if (state.count < 0) return 'Count cannot be negative';
+          if (state.user?.name === '') return 'Username cannot be empty';
+          return true;
+        }
+      }
+    );
+
+    expect(() => validateStore.set('count', -1))
+      .toThrow('Count cannot be negative');
+    
+    expect(() => validateStore.set('user', { name: '' }))
+      .toThrow('Username cannot be empty');
+  });
+
+  it('should handle middleware errors gracefully', () => {
+    const errorMiddleware = {
+      onSet: () => { throw new Error('Middleware error'); },
+      onGet: () => { throw new Error('Middleware error'); }
+    };
+
+    store.use(errorMiddleware);
+    expect(() => store.set('count', 1)).toThrow('Middleware error');
+    expect(() => store.get('count')).toThrow('Middleware error');
+  });
+
+  it('should handle batch operation failures atomically', () => {
+    const store = createStore(
+      { count: 0 },
+      { 
+        validate: (state: any) => {
+          if (state.count > 10) return 'Count cannot exceed 10';
+          return true;
+        }
+      }
+    );
+    
+    const initialState = store.getState();
+    
+    expect(() => {
+      store.batch([
+        ['count', 5],
+        ['count', 15], 
+        ['count', 2]
+      ]);
+    }).toThrow('State validation failed: Count cannot exceed 10');
+
+    // state should be rolled back
+    expect(store.getState()).toEqual(initialState);
+});
+
+  it('should handle computed value errors', () => {
+    const computed = store.computed('errorComputed', () => {
+      throw new Error('Computation error');
+    });
+
+    expect(() => computed()).toThrow('Computation error');
+  });
+
+  it('should prevent prototype pollution attacks', () => {
+    const maliciousPayload = JSON.parse('{"__proto__": {"malicious": true}}');
+    expect(() => store.set('user', maliciousPayload)).toThrow();
+    expect((({} as any).malicious)).toBeUndefined();
+  });
+});
 
 describe('createStore', () => {
     let store: ReturnType<typeof createStore<TestState>>;

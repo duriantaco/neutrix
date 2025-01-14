@@ -1,4 +1,8 @@
-// src/react/index.ts
-export { Provider as StoreProvider } from './provider';
-export { useStoreContext } from './context';
-export { useStore, useComputed, useAction } from './hooks';
+export { NeutrixProvider } from './NeutrixProvider';
+export type { NeutrixProviderProps } from './NeutrixProvider';
+
+export {
+  useNeutrixSelector,
+  useNeutrixComputed,
+  useNeutrixAction
+} from './hooks';

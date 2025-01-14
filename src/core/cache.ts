@@ -1,3 +1,5 @@
+//src/core/cache.ts
+
 export class LRUCache<K, V> {
   private cache = new Map<K, V>();
   private maxSize: number;

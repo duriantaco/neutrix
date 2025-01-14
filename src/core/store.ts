@@ -3,6 +3,9 @@ import { State, Store, StoreOptions, BatchUpdate, ComputedFn, Action } from './t
 import { get, set } from './utils';
 import { Middleware } from './types';
 import { LRUCache } from './cache';
+import { startTransition } from 'react';
+import { useSyncExternalStore } from 'react';
+
 
 declare global {
   interface Window {
@@ -10,9 +13,37 @@ declare global {
   }
 }
 
+export interface ExtendedStoreOptions extends StoreOptions {
+  concurrency?: boolean;
+}
+
+function hasCircularReference(obj: any, seen = new WeakSet()): boolean {
+  if (typeof obj !== 'object' || obj === null) return false;
+  
+  if (seen.has(obj)) return true;
+  seen.add(obj);
+  
+  return Object.values(obj).some(value => hasCircularReference(value, seen));
+}
+
+function isPrototypePolluted(key: string): boolean {
+  return key === '__proto__' || key === 'constructor' || key === 'prototype';
+}
+
+function validateObject(obj: any, path: string = ''): void {
+  if (obj && typeof obj === 'object') {
+    Object.keys(obj).forEach(key => {
+      if (isPrototypePolluted(key)) {
+        throw new Error(`Potential prototype pollution detected at ${path}.${key}`);
+      }
+      validateObject(obj[key], `${path}.${key}`);
+    });
+  }
+}
+
 export function createStore<T extends State>(
   initialState: T = {} as T,
-  options: StoreOptions = {}
+  options: ExtendedStoreOptions = {}
 ): Store<T> {
   let state = { ...initialState };
   const computedCache = new LRUCache<string, any>(50);
@@ -150,14 +181,20 @@ export function createStore<T extends State>(
     },
     
     set: <K extends keyof T>(path: K | string, value: any): void => {
-      const prevValue = get(state, path as string);
-      let nextValue = value;
+      const setterLogic = () => {
+        validateObject(value);
+        const prevValue = get(state, path as string);
+        let nextValue = value;
       
-      middlewares.forEach(m => {
-        if (m.onSet) {
-          nextValue = m.onSet(path as string, nextValue, prevValue);
+        if (hasCircularReference(nextValue)) {
+          throw new Error('Circular reference detected in state');
         }
-      });
+        
+        middlewares.forEach(m => {
+          if (m.onSet) {
+            nextValue = m.onSet(path as string, nextValue, prevValue);
+          }
+        });
 
       if (nextValue !== prevValue) {
         const newState = set(state, path as string, nextValue) as T;
@@ -168,14 +205,26 @@ export function createStore<T extends State>(
         notify(path as string);
         updateDevTools(`Set ${String(path)}`);
       }
-    },
+    };
+
+    if (options.concurrency && typeof startTransition === 'function') {
+      startTransition(setterLogic);
+    } else {
+      setterLogic();
+    }
+  },
 
     batch: (updates: BatchUpdate): void => {
       const affectedPaths = new Set<string>();
       const newState = { ...state };
+      const oldState = { ...state };
 
       try {
         updates.forEach(([path, value]) => {
+          if (!path) {
+            throw new Error('Invalid path in batch update');
+          }
+          
           const prevValue = get(newState, path);
           if (value !== prevValue) {
             const updatedState = set(newState, path, value) as T;
@@ -186,13 +235,14 @@ export function createStore<T extends State>(
             affectedPaths.add(path);
           }
         });
-
+    
         if (affectedPaths.size > 0) {
           state = newState;
           updateDevTools('Batch Update');
           notify();
         }
       } catch (error) {
+        state = oldState;
         console.error('Batch update failed:', error);
         throw error;
       }
@@ -278,3 +328,29 @@ export function createStore<T extends State>(
     }
   });
 }
+
+export function createStoreForSSR<T extends State>(
+  initialState: T,
+  options?: ExtendedStoreOptions
+) {
+  const store = createStore<T>(initialState, options);
+
+  return {
+    store,
+    getServerSnapshot: () => {
+      return JSON.stringify(store.getState());
+    },
+    rehydrate: (snapshot: string) => {
+      try {
+        const parsed = JSON.parse(snapshot);
+        Object.keys(parsed).forEach(path => {
+          store.set(path, parsed[path]); 
+        });
+      } catch (err) {
+        console.error('Failed to parse SSR snapshot:', err);
+      }
+    }
+  };
+}
+
+export { createStore as createBaseStore } from './store';

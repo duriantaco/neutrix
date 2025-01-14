@@ -1,3 +1,4 @@
+// src/core/connections.ts
 import { StoreConnection, State } from './types';
 
 export function connectStores<S extends State = State, T extends State = State>(

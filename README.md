@@ -5,6 +5,23 @@ A powerful and hopefully simple state management library for React.
 ## Docs!
 Docs can be found here: [https://duriantaco.github.io/neutrix](https://duriantaco.github.io/neutrix)
 
+## Installation
+
+`npm install neutrix`
+# or
+`yarn add neutrix`
+
+## Features at a glance
+
+- 📦 **Lightweight Core**
+- 🎯 **Simple API**: Just `get()` and `set()` for most use cases
+- 🔄 **Flexible Store Design**: Support for both single and multiple store patterns
+- ⚡ **High Performance**: Automatic dependency tracking and LRU caching
+- 🛠 **Developer Tools**: Redux DevTools integration out of the box
+- 🎨 **TypeScript-First**: Built with full type safety
+- 🔍 **Smart Updates**: Deep state updates and automatic batching
+- 🧪 **SSR Ready**: Built-in server-side rendering support
+
 ## Motivation
 
 ### Why Another State Manager?
@@ -13,16 +30,6 @@ Most state managers claim to solve Redux's problems but end up doing the same th
 ### State management shouldn't be complicated .
 
 While Redux offers great dev tools and predictable updates, and MobX provides elegant reactivity, they both come with significant learning curves and boilerplate (Redux has tons of it and it's extremely frustrating to use- or maybe I'm just dumb). We built neutrix because we believe you shouldn't need to learn actions, reducers, observables, or complex patterns just to manage your app's state. There's enough s**t to do, and am trying not to make it even more difficult than it has to be.
-
-## Why neutrix?
-
-- 📦 **Tiny**
-- 🎯 **Dead simple API** - just get() and set()
-- 🔥 **Powerful features** under the hood
-- ⚡ **High performance** with automatic optimizations
-- 🛠 **Redux DevTools** support out of the box
-- 🎨 **TypeScript** ready
-- 0️⃣ Minimal configuration
 
 ## Docs!
 Docs can be found here 
@@ -40,10 +47,16 @@ const selectFullName = createSelector(
   (first, last) => `${first} ${last}`
 );
 
-// neutrix: Automatic tracking
-const fullName = store.computed('fullName', state => {
-  return `${state.user.firstName} ${state.user.lastName}`;
-});
+// neutrix: Automatic tracking using hooks
+function ProfileName() {
+  const fullName = useNeutrixComputed(store => {
+    const firstName = store.get('user.firstName');
+    const lastName = store.get('user.lastName');
+    return `${firstName} ${lastName}`;
+  });
+  
+  return <h1>{fullName}</h1>;
+}
 ```
 
 ### 2. Bidirectional middleware
@@ -56,23 +69,29 @@ store.use({
   onGet: (path, value) => {
     console.log(`Reading ${path}: ${value}`);
     return value;
+  },
+  onBatch: (updates) => {
+    console.log('Batch update:', updates);
+    return updates;
   }
 });
 ```
 
-### 3. Caching
-
-Computed values are cached using an LRU strategy:
-
-`const computedCache = new LRUCache<string, any>(50);`
-
-This provides optimal performance while preventing memory leaks.
-
-### 4. Dependency tracking
-
-neutrix uses ES6 Proxies to automatically track dependencies in computed values:
+### Performance optimization
 
 ```typescript
+// LRU Caching for computed values
+const computedCache = new LRUCache<string, any>(50);
+
+// Automatic dependency tracking
+const trackDependency = (path: string, computedPath: string) => {
+  if (!dependencyGraph.has(path)) {
+    dependencyGraph.set(path, new Set());
+  }
+  dependencyGraph.get(path)!.add(computedPath);
+};
+
+// Smart proxy-based tracking
 const proxy = new Proxy(state, {
   get(target, prop: string) {
     trackDependency(prop, path);
@@ -81,57 +100,92 @@ const proxy = new Proxy(state, {
 });
 ```
 
-## Installation
-
-`npm install neutrix`
-# or
-`yarn add neutrix`
 
 ## Quick Start
 
-## Simple Example: 
+## Multiple Stores Example: 
 
 ```typescript
-// 1. Create stores
-const userStore = createStore({
+interface UserState {
+  user: null | { name: string };
+  theme: 'light' | 'dark';
+}
+
+interface CartState {
+  items: string[];
+}
+
+const { store: userStore, useStore: useUserStore } = createNeutrixStore<UserState>({
   user: null,
   theme: 'light'
 });
 
-const cartStore = createStore({
+const { store: cartStore, useStore: useCartStore } = createNeutrixStore<CartState>({
   items: []
 });
 
-// 2. Use them
+// 2. use them with the provider
 function App() {
   return (
-    <Provider store={userStore}>
-      <Provider store={cartStore}>
-        <YourApp />
-      </Provider>
-    </Provider>  
+    <NeutrixProvider stores={{ userStore, cartStore }}>
+      <YourApp />
+    </NeutrixProvider>
   );
 }
 
-// 3. That's it..
+// 3. use hooks in components
 function Profile() {
-  const { user } = useStore(store => ({
-    user: store.get('user')
-  }));
+  const user = useNeutrixSelector(store => store.get('user'));
+  const { execute: updateTheme } = useNeutrixAction(
+    async (store) => {
+      store.set('theme', 'dark');
+    }
+  );
 
   return (
-    <button onClick={() => store.set('theme', 'dark')}>
+    <button onClick={() => updateTheme()}>
       Hi {user?.name}!
     </button>
   );
 }
 ```
 
+## Single Store Example
+
+```typescript
+interface AppState {
+  user: null | { name: string };
+  theme: 'light' | 'dark';
+}
+
+function AppWithOneStore() {
+  const { store, Provider } = createNeutrixStore<AppState>({
+    user: null,
+    theme: 'light'
+  });
+
+  return (
+    <Provider>
+      <YourApp />
+    </Provider>
+  );
+}
+```
+
+
 ## Real world example:
 
 ```typescript
-// userStore.ts - All the user's data
-const userStore = createStore({
+// userStore.ts
+interface UserState {
+  profile: null | { name: string };
+  preferences: {
+    theme: 'light' | 'dark';
+    language: string;
+  };
+}
+
+const { store: userStore, useStore: useUserStore } = createNeutrixStore<UserState>({
   profile: null,
   preferences: {
     theme: 'light',
@@ -139,16 +193,31 @@ const userStore = createStore({
   }
 });
 
-// featureStore.ts 
-const featureStore = createStore({
+// featureStore.ts
+interface FeatureState {
+  features: {
+    newDashboard: boolean;
+    betaFeatures: boolean;
+  };
+}
+
+const { store: featureStore, useStore: useFeatureStore } = createNeutrixStore<FeatureState>({
   features: {
     newDashboard: false,
     betaFeatures: false
   }
 });
 
-// notificationStore.ts - noti center thingy
-const notificationStore = createStore({
+// notificationStore.ts
+interface NotificationState {
+  notifications: Array<{ id: string; message: string }>;
+  settings: {
+    email: boolean;
+    push: boolean;
+  };
+}
+
+const { store: notificationStore, useStore: useNotificationStore } = createNeutrixStore<NotificationState>({
   notifications: [],
   settings: {
     email: true,
@@ -159,25 +228,22 @@ const notificationStore = createStore({
 // App.tsx
 function App() {
   return (
-    <Provider store={userStore}>
-      <Provider store={featureStore}>
-        <Provider store={notificationStore}>
-          <Header />
-          <MainContent />
-          <NotificationCenter />
-        </Provider>
-      </Provider>
-    </Provider>
+    <NeutrixProvider stores={{
+      userStore,
+      featureStore,
+      notificationStore
+    }}>
+      <Header />
+      <MainContent />
+      <NotificationCenter />
+    </NeutrixProvider>
   );
 }
 
 // Header.tsx
 function Header() {
-  // Only cares about user stuff - just use the hook directly
-  const { profile, preferences } = useStore(store => ({
-    profile: store.get('profile'),
-    preferences: store.get('preferences')
-  }));
+  const profile = useNeutrixSelector(store => store.get('profile'));
+  const preferences = useNeutrixSelector(store => store.get('preferences'));
 
   return (
     <header>
@@ -189,11 +255,8 @@ function Header() {
 
 // NotificationCenter.tsx
 function NotificationCenter() {
-  // Only subscribes to notification updates - clean and simple!!
-  const { notifications } = useStore(store => ({
-    notifications: store.get('notifications')
-  }));
-
+  const notifications = useNeutrixSelector(store => store.get('notifications'));
+  
   return (
     <div>
       {notifications.map(note => (
@@ -204,9 +267,8 @@ function NotificationCenter() {
 }
 
 // FeatureGate.tsx
-function FeatureGate({ feature, children }) {
-  // checks feature flags ONLY - direct path access - clean and simple!!!
-  const isEnabled = useStore(store => 
+function FeatureGate({ feature, children }: { feature: keyof FeatureState['features']; children: React.ReactNode }) {
+  const isEnabled = useNeutrixSelector(store => 
     store.get(`features.${feature}`)
   );
 
@@ -218,27 +280,28 @@ function FeatureGate({ feature, children }) {
 
 ### vs Redux
 - No actions/reducers boilerplate
-- No middleware complexity
-- No connect() HOCs
-- Same great dev tools
-- Simpler async handling
-- Easier deep updates
+- Simpler middleware system (just `onGet`/`onSet`/`onBatch`)
+- Hooks-based instead of HOCs
+- Built-in async action handling with loading states
+- Automatic deep updates with path syntax
 
 ### vs MobX
-- No decorators or class syntax
-- No observable complexities
-- More predictable updates
-- Simpler mental model
-- Better TypeScript support
-- Less magic
+- No decorators needed
+- Explicit subscriptions via hooks
+- Predictable updates through immutable state
+- Simpler mental model with `get`/`set`
+- Good TypeScript support
 
 ### vs Context
-- Better performance
-- Simpler API for updates
-- Deep updates out of the box
-- DevTools support
-- No provider hell
-- Proper state management patterns
+- Optimized re-renders via smart subscriptions
+- Granular updates with path syntax
+- Built-in caching and memoization
+- DevTools integration
+- Single provider pattern
+- Built-in performance optimizations
+- Consolidated store management through `NeutrixProvider`
+
+This clarifies how exactly “No provider hell” is accomplished.
 
 ## Under The Hood
 

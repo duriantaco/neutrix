@@ -4,6 +4,11 @@ export type Path = string;
 export type Subscriber = () => void;
 export type BatchUpdate = Array<[string, any]>;
 export type ComputedFn<T> = () => T;
+export type StoreSelector<T extends State, R> = (store: Store<T>) => R;
+export type UseStoreHook<T extends State> = <R>(selector: StoreSelector<T, R>) => R;
+export type State = Record<string, any>;
+
+export type StoreAction<T extends State> = (state: T, ...args: any[]) => Partial<T> | Promise<Partial<T>>;
 
 export type DeepPartial<T> = T extends Primitive
   ? T
@@ -12,10 +17,6 @@ export type DeepPartial<T> = T extends Primitive
   : T extends object
   ? { [K in keyof T]?: DeepPartial<T[K]> }
   : T;
-
-export interface State {
-  [key: string]: any;
-}
 
 export interface StoreOptions {
   name?: string;
@@ -54,6 +55,11 @@ export type Action<Args extends any[], Result> = (
   store: Store<any>,
   ...args: Args
 ) => Promise<Result>;
+
+export interface NeutrixStore<T extends State> {
+  store: Store<T>;
+  useStore: UseStoreHook<T>;
+}
 
 export interface StoreConnection<S extends State = State, T extends State = State> {
   source: Store<S>;
